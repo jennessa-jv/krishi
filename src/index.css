@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-dark-bg: #071a13;
+  --color-dark-surface: #10311f;
+  --color-dark-primary: #d4af37;
+  --color-dark-secondary: #214b2e;
+  --color-dark-accent: #f6d46f;
+  --color-dark-text: #f8efd0;
+  --color-dark-muted: #d9c88b;
+  --color-dark-border: #8b6d22;
+}
+
+@layer base {
+  body {
+    background-image: linear-gradient(135deg, var(--color-dark-bg) 0%, #0d2a1a 100%);
+    color: var(--color-dark-text);
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background-color: var(--color-dark-bg);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-dark-border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-dark-primary);
+}
+
+/* Markdown Content Styling */
+.markdown-content {
+  font-family: 'Outfit', sans-serif;
+}
+
+.markdown-content h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--color-dark-text);
+  margin-bottom: 1.5rem;
+  margin-top: 2rem;
+  line-height: 1.2;
+}
+
+.markdown-content h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-dark-accent);
+  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-dark-border);
+}
+
+.markdown-content p {
+  font-size: 1.125rem;
+  color: var(--color-dark-muted);
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+}
+
+.markdown-content strong {
+  color: var(--color-dark-accent);
+  font-weight: 700;
+}
+
+.markdown-content ul {
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-bottom: 1.5rem;
+}
+
+.markdown-content li {
+  font-size: 1.125rem;
+  color: var(--color-dark-muted);
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content img {
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  height: auto;
+  border: 4px solid var(--color-dark-surface);
+}

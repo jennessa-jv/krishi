@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#071a13"/>
+  <rect x="40" y="40" width="720" height="420" rx="28" fill="#10311f" stroke="#d4af37" stroke-width="6"/>
+  <path d="M220 360 C240 260 280 220 320 180 C360 140 418 128 460 182 C496 228 500 292 470 360" stroke="#d4af37" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <path d="M320 182 L344 118 L372 182" fill="#f6d46f"/>
+  <path d="M290 360 L300 280 L320 360" fill="#214b2e"/>
+  <path d="M460 360 L470 280 L490 360" fill="#2f5b3b"/>
+  <text x="90" y="110" fill="#f8efd0" font-family="Outfit, Arial, sans-serif" font-size="42" font-weight="700">Black pepper</text>
+  <text x="90" y="148" fill="#d9c88b" font-family="Outfit, Arial, sans-serif" font-size="22">Climbing vines and disease-safe support</text>
+</svg>

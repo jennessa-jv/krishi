@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#071a13"/>
+  <rect x="40" y="40" width="720" height="420" rx="28" fill="#10311f" stroke="#d4af37" stroke-width="6"/>
+  <path d="M220 370 L245 220 L280 370" fill="none" stroke="#d4af37" stroke-width="16" stroke-linecap="round"/>
+  <path d="M360 370 L385 180 L420 370" fill="none" stroke="#f6d46f" stroke-width="16" stroke-linecap="round"/>
+  <path d="M510 370 L535 220 L570 370" fill="none" stroke="#d4af37" stroke-width="16" stroke-linecap="round"/>
+  <path d="M180 270 L610 270" stroke="#214b2e" stroke-width="22" stroke-linecap="round"/>
+  <path d="M268 220 C300 180 330 160 360 160 C390 160 420 180 450 220" stroke="#2f5b3b" stroke-width="8" fill="none"/>
+  <text x="90" y="110" fill="#f8efd0" font-family="Outfit, Arial, sans-serif" font-size="42" font-weight="700">Areca nut</text>
+  <text x="90" y="148" fill="#d9c88b" font-family="Outfit, Arial, sans-serif" font-size="22">Plantation care and intercropping</text>
+</svg>
