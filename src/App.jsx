@@ -17,8 +17,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-dark-bg text-dark-text font-sans flex flex-col">
       <nav className="sticky top-0 z-50 bg-dark-surface border-b border-dark-border px-6 py-4 flex items-center justify-between shadow-sm">
-        <div className="text-2xl font-extrabold text-dark-text tracking-tight">
-          Agriculture Portal
+        <div className="text-2xl font-extrabold text-dark-text tracking-tight" style={{ fontFamily: 'Merriweather, serif' }}>
+          Krishi
         </div>
         <div className="flex gap-2">
           {Object.entries(guides).map(([key, { name }]) => (
