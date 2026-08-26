@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { pipeline } from '@xenova/transformers';
+import { BookOpen, ChevronRight, Leaf, MessageCircle, Send, Sparkles, X } from 'lucide-react';
 import guideEn from './content/guide_en.md?raw';
 import guideKn from './content/guide_kn.md?raw';
 import guideTcy from './content/guide_tcy.md?raw';
@@ -11,38 +13,183 @@ const guides = {
   tcy: { name: 'ತುಳು (Tulu)', content: guideTcy }
 };
 
+const suggestions = {
+  en: ['How should I manage water during monsoon?', 'Which crops work well under areca?', 'How can I reduce disease risk?'],
+  kn: ['ಮುಂಗಾರಿನಲ್ಲಿ ನೀರನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸಬೇಕು?', 'ಅಡಿಕೆಯೊಂದಿಗೆ ಯಾವ ಬೆಳೆಗಳನ್ನು ಬೆಳೆಯಬಹುದು?', 'ರೋಗದ ಅಪಾಯವನ್ನು ಹೇಗೆ ಕಡಿಮೆ ಮಾಡಬಹುದು?'],
+  tcy: ['ಮುಂಗಾರೊಡು ನೀರ್ ಎಂಚ ನಿರ್ವಹಣೆ ಮಲ್ಪುನೆ?', 'ಅಡಿಕೆದ ಒಟ್ಟುಗು ವಾ ಬೆಳೆಕುಲು ಎಡ್ಡೆ?', 'ಸೀಕ್‌ದ ಅಪಾಯ ಎಂಚ ಕಮ್ಮಿ ಮಲ್ಪುನೆ?']
+};
+
+const labels = {
+  en: { title: 'Ask Krishi', subtitle: 'Answers from your farming guide', placeholder: 'Ask about crops, soil, water or schemes...', welcome: 'Hello. Ask me about farming in Dakshina Kannada.', grounded: 'Grounded in your selected guide', sources: 'Source', empty: 'I could not find a close match in this guide. Try asking about a crop, season, soil, drainage, pests, schemes or markets.', open: 'Open guide', close: 'Close assistant' },
+  kn: { title: 'ಕೃಷಿಯನ್ನು ಕೇಳಿ', subtitle: 'ನಿಮ್ಮ ಕೃಷಿ ಮಾರ್ಗದರ್ಶಿಯಿಂದ ಉತ್ತರಗಳು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣು, ನೀರು ಅಥವಾ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿಯ ಬಗ್ಗೆ ಕೇಳಿ.', grounded: 'ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಯಲ್ಲಿ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಗಲಿಲ್ಲ. ಬೆಳೆ, ಋತು, ಮಣ್ಣು, ಒಳಚರಂಡಿ, ಕೀಟ, ಯೋಜನೆ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಿ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಯಿರಿ', close: 'ಸಹಾಯಕನನ್ನು ಮುಚ್ಚಿ' },
+  tcy: { title: 'ಕೃಷಿನ್ ಕೇಳಲೆ', subtitle: 'ನಿಕ್ಲೆನ ಮಾರ್ಗದರ್ಶಿರ್ದ್ ಉತ್ತರ', placeholder: 'ಬೆಳೆ, ಮಣ್ಣ್, ನೀರ್ ಅತ್ತ್ಂಡ ಯೋಜನೆ ಬಗ್ಗೆ ಕೇಳಲೆ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿದ ಬಗ್ಗೆ ಕೇಳಲೆ.', grounded: 'ಆಯ್ಕೆ ಮಲ್ತಿನ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಡ್ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಕ್ಕಿಜಿ. ಬೆಳೆ, ಋತು, ಮಣ್ಣ್, ಡ್ರೈನೇಜ್, ಕೀಟ, ಯೋಜನೆ ಅತ್ತ್ಂಡ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಲೆ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಲೆ', close: 'ಸಹಾಯಕನ್ ಮುಚ್ಚಲೆ' }
+};
+
+function buildSections(content) {
+  return content.split(/(?=^##\s)/m).map((section) => {
+    const heading = section.match(/^##\s+(.+)$/m)?.[1]?.trim();
+    return heading ? { heading, content: section.trim() } : null;
+  }).filter(Boolean);
+}
+
+const VECTOR_DB_NAME = 'krishi-vector-database';
+const VECTOR_STORE_NAME = 'guide-sections';
+let embedderPromise;
+
+function getEmbedder() {
+  embedderPromise ||= pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+  return embedderPromise;
+}
+
+function openVectorDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(VECTOR_DB_NAME, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(VECTOR_STORE_NAME, { keyPath: 'id' });
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function readVectorIndex(language) {
+  const database = await openVectorDatabase();
+  return new Promise((resolve, reject) => {
+    const request = database.transaction(VECTOR_STORE_NAME, 'readonly').objectStore(VECTOR_STORE_NAME).getAll();
+    request.onsuccess = () => resolve(request.result.filter((entry) => entry.language === language));
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function writeVectorIndex(language, sections) {
+  const embed = await getEmbedder();
+  const vectors = await Promise.all(sections.map(async (section, index) => {
+    const output = await embed(`${section.heading}\n${section.content}`, { pooling: 'mean', normalize: true });
+    return { id: `${language}-${index}`, language, heading: section.heading, content: section.content, vector: Array.from(output.data) };
+  }));
+  const database = await openVectorDatabase();
+  await new Promise((resolve, reject) => {
+    const transaction = database.transaction(VECTOR_STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(VECTOR_STORE_NAME);
+    store.getAll().onsuccess = (event) => event.target.result
+      .filter((entry) => entry.language === language)
+      .forEach((entry) => store.delete(entry.id));
+    vectors.forEach((vector) => store.put(vector));
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+  });
+  return vectors;
+}
+
+async function getVectorIndex(language, sections) {
+  const stored = await readVectorIndex(language);
+  const isCurrent = stored.length === sections.length && stored.every((entry, index) => entry.heading === sections[index].heading);
+  return isCurrent ? stored : writeVectorIndex(language, sections);
+}
+
+function cosineSimilarity(first, second) {
+  return first.reduce((total, value, index) => total + value * second[index], 0);
+}
+
+function findKeywordAnswer(question, sections) {
+  const stopWords = new Set(['what', 'which', 'how', 'can', 'are', 'the', 'for', 'about', 'from', 'and', 'you', 'your', 'present']);
+  const relatedTerms = {
+    weather: ['climate', 'rainfall', 'monsoon'],
+    climate: ['weather', 'rainfall', 'monsoon'],
+    rain: ['rainfall', 'monsoon', 'drainage'],
+    rainfall: ['rain', 'monsoon', 'drainage']
+  };
+  const tokenize = (text) => text.toLocaleLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || [];
+  const terms = [...new Set(tokenize(question)
+    .filter((term) => !stopWords.has(term))
+    .flatMap((term) => [term, ...(relatedTerms[term] || [])]))];
+  const ranked = sections.map((section) => {
+    const headingTerms = new Set(tokenize(section.heading));
+    const contentTerms = new Set(tokenize(section.content));
+    const score = terms.reduce((total, term) => total + (headingTerms.has(term) ? 4 : contentTerms.has(term) ? 1 : 0), 0);
+    return { ...section, score };
+  }).sort((first, second) => second.score - first.score);
+  return ranked[0]?.score ? ranked[0] : null;
+}
+
+async function findSemanticAnswer(question, language, sections) {
+  try {
+    const embed = await getEmbedder();
+    const output = await embed(question, { pooling: 'mean', normalize: true });
+    const questionVector = Array.from(output.data);
+    const index = await getVectorIndex(language, sections);
+    return index.map((entry) => ({ ...entry, score: cosineSimilarity(questionVector, entry.vector) }))
+      .sort((first, second) => second.score - first.score)[0] || null;
+  } catch {
+    return findKeywordAnswer(question, sections);
+  }
+}
+
 export default function App() {
   const [lang, setLang] = useState('en');
+  const [chatOpen, setChatOpen] = useState(true);
+  const [question, setQuestion] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [indexStatus, setIndexStatus] = useState('loading');
+  const currentLabels = labels[lang];
+  const sections = useMemo(() => buildSections(guides[lang].content), [lang]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setIndexStatus('loading');
+    getVectorIndex(lang, sections)
+      .then(() => !cancelled && setIndexStatus('ready'))
+      .catch(() => !cancelled && setIndexStatus('fallback'));
+    return () => { cancelled = true; };
+  }, [lang, sections]);
+
+  function switchLanguage(nextLanguage) {
+    setLang(nextLanguage);
+    setMessages([]);
+  }
+
+  async function ask(value = question) {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const match = await findSemanticAnswer(trimmed, lang, sections);
+    setMessages((previous) => [...previous, {
+      question: trimmed,
+      answer: match?.content.replace(/^##\s+.*$/m, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').trim() || currentLabels.empty,
+      source: match?.heading
+    }]);
+    setQuestion('');
+  }
 
   return (
-    <div className="min-h-screen bg-dark-bg text-dark-text font-sans flex flex-col">
-      <nav className="sticky top-0 z-50 bg-dark-surface border-b border-dark-border px-6 py-4 flex items-center justify-between shadow-sm">
-        <div className="text-2xl font-extrabold text-dark-text tracking-tight" style={{ fontFamily: 'Merriweather, serif' }}>
-          Krishi
-        </div>
-        <div className="flex gap-2">
+    <div className="app-shell">
+      <nav className="topbar">
+        <div className="brand"><span className="brand-mark"><Leaf size={19} /></span><span>Krishi</span></div>
+        <div className="language-switcher" aria-label="Guide language">
           {Object.entries(guides).map(([key, { name }]) => (
             <button
               key={key}
-              onClick={() => setLang(key)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                lang === key 
-                  ? 'bg-dark-primary text-dark-bg shadow-sm' 
-                  : 'bg-dark-bg text-dark-text border border-dark-border hover:bg-dark-secondary/50'
-              }`}
+              onClick={() => switchLanguage(key)}
+              className={lang === key ? 'language-button active' : 'language-button'}
             >
               {name}
             </button>
           ))}
         </div>
       </nav>
-
-      <main className="flex-1 max-w-4xl w-full mx-auto p-8 animate-in fade-in duration-500">
-        <article className="markdown-content">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {guides[lang].content}
-          </ReactMarkdown>
-        </article>
+      <main className="content-layout">
+        <section className="guide-column">
+          <div className="guide-intro"><p className="eyebrow">FIELD NOTES / DAKSHINA KANNADA</p><h1>Practical knowledge<br /><em>for your next season.</em></h1><p className="intro-copy">A locally grounded guide to crops, climate, soil health and resilient farm decisions.</p></div>
+          <article className="markdown-content"><ReactMarkdown remarkPlugins={[remarkGfm]}>{guides[lang].content}</ReactMarkdown></article>
+        </section>
+        {chatOpen && <aside className="chat-panel" aria-label={currentLabels.title}>
+          <div className="chat-header"><div className="chat-title"><span className="chat-icon"><MessageCircle size={18} /></span><div><strong>{currentLabels.title}</strong><small>{currentLabels.subtitle}</small></div></div><button className="icon-button" onClick={() => setChatOpen(false)} aria-label={currentLabels.close}><X size={18} /></button></div>
+          <div className="chat-body">
+            <div className="assistant-message"><span className="mini-avatar"><Sparkles size={14} /></span><p>{currentLabels.welcome}</p></div>
+            {messages.map((message, index) => <div className="message-group" key={`${message.question}-${index}`}><div className="user-message">{message.question}</div><div className="assistant-message"><span className="mini-avatar"><Sparkles size={14} /></span><div><p>{message.answer}</p>{message.source && <small className="citation"><BookOpen size={13} /> {currentLabels.sources}: {message.source}</small>}</div></div></div>)}
+            <div className="suggestion-list">{suggestions[lang].map((suggestion) => <button key={suggestion} className="suggestion" onClick={() => ask(suggestion)}>{suggestion}<ChevronRight size={15} /></button>)}</div>
+          </div>
+          <form className="chat-input" onSubmit={(event) => { event.preventDefault(); ask(); }}><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder={currentLabels.placeholder} aria-label={currentLabels.placeholder} /><button type="submit" aria-label="Send question"><Send size={17} /></button></form>
+          <div className="grounding-note"><span className="status-dot" /> {indexStatus === 'loading' ? 'Preparing semantic search...' : currentLabels.grounded}</div>
+        </aside>}
+        {!chatOpen && <button className="reopen-chat" onClick={() => setChatOpen(true)}><MessageCircle size={18} /> {currentLabels.title}</button>}
       </main>
     </div>
   );
