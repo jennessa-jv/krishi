@@ -182,3 +182,8 @@
     border-right-color: var(--border);
   }
 }
+
+.mode-switcher { display: flex; gap: 6px; margin: 0 0 18px 34px; }
+.mode-button { border: 1px solid var(--line); border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; padding: 7px 9px; font-size: 11px; }
+.mode-button.active, .mode-button:hover { border-color: var(--green); color: var(--green); background: #f0f5ed; }
+.mode-button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }

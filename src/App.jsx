@@ -20,9 +20,9 @@ const suggestions = {
 };
 
 const labels = {
-  en: { title: 'Ask Krishi', subtitle: 'Answers from your farming guide', placeholder: 'Ask about crops, soil, water or schemes...', welcome: 'Hello. Ask me about farming in Dakshina Kannada.', grounded: 'Grounded in your selected guide', sources: 'Source', empty: 'I could not find a close match in this guide. Try asking about a crop, season, soil, drainage, pests, schemes or markets.', open: 'Open guide', close: 'Close assistant' },
-  kn: { title: 'ಕೃಷಿಯನ್ನು ಕೇಳಿ', subtitle: 'ನಿಮ್ಮ ಕೃಷಿ ಮಾರ್ಗದರ್ಶಿಯಿಂದ ಉತ್ತರಗಳು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣು, ನೀರು ಅಥವಾ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿಯ ಬಗ್ಗೆ ಕೇಳಿ.', grounded: 'ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಯಲ್ಲಿ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಗಲಿಲ್ಲ. ಬೆಳೆ, ಋತು, ಮಣ್ಣು, ಒಳಚರಂಡಿ, ಕೀಟ, ಯೋಜನೆ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಿ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಯಿರಿ', close: 'ಸಹಾಯಕನನ್ನು ಮುಚ್ಚಿ' },
-  tcy: { title: 'ಕೃಷಿನ್ ಕೇಳಲೆ', subtitle: 'ನಿಕ್ಲೆನ ಮಾರ್ಗದರ್ಶಿರ್ದ್ ಉತ್ತರ', placeholder: 'ಬೆಳೆ, ಮಣ್ಣ್, ನೀರ್ ಅತ್ತ್ಂಡ ಯೋಜನೆ ಬಗ್ಗೆ ಕೇಳಲೆ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿದ ಬಗ್ಗೆ ಕೇಳಲೆ.', grounded: 'ಆಯ್ಕೆ ಮಲ್ತಿನ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಡ್ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಕ್ಕಿಜಿ. ಬೆಳೆ, ಋತು, ಮಣ್ಣ್, ಡ್ರೈನೇಜ್, ಕೀಟ, ಯೋಜನೆ ಅತ್ತ್ಂಡ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಲೆ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಲೆ', close: 'ಸಹಾಯಕನ್ ಮುಚ್ಚಲೆ' }
+  en: { title: 'Ask Krishi', subtitle: 'Answers from your farming guide', latestSubtitle: 'Current sources with citations', placeholder: 'Ask about crops, soil, water or schemes...', welcome: 'Hello. Ask me about farming in Dakshina Kannada.', grounded: 'Grounded in your selected guide', latest: 'Latest information', guide: 'Guide answer', sources: 'Source', empty: 'I could not find a close match in this guide. Try asking about a crop, season, soil, drainage, pests, schemes or markets.', open: 'Open guide', close: 'Close assistant' },
+  kn: { title: 'ಕೃಷಿಯನ್ನು ಕೇಳಿ', subtitle: 'ನಿಮ್ಮ ಕೃಷಿ ಮಾರ್ಗದರ್ಶಿಯಿಂದ ಉತ್ತರಗಳು', latestSubtitle: 'ಪ್ರಸ್ತುತ ಮೂಲಗಳು ಮತ್ತು ಉಲ್ಲೇಖಗಳು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣು, ನೀರು ಅಥವಾ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿಯ ಬಗ್ಗೆ ಕೇಳಿ.', grounded: 'ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಯಲ್ಲಿ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಗಲಿಲ್ಲ. ಬೆಳೆ, ಋತು, ಮಣ್ಣು, ಒಳಚರಂಡಿ, ಕೀಟ, ಯೋಜನೆ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಿ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಯಿರಿ', close: 'ಸಹಾಯಕನನ್ನು ಮುಚ್ಚಿ' },
+  tcy: { title: 'ಕೃಷಿನ್ ಕೇಳಲೆ', subtitle: 'ನಿಕ್ಲೆನ ಮಾರ್ಗದರ್ಶಿರ್ದ್ ಉತ್ತರ', latestSubtitle: 'ಇತ್ತೀಚಿನ ಮೂಲೊಲು ಅತ್ತ್ಂಡ ಉಲ್ಲೇಖೊಲು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣ್, ನೀರ್ ಅತ್ತ್ಂಡ ಯೋಜನೆ ಬಗ್ಗೆ ಕೇಳಲೆ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿದ ಬಗ್ಗೆ ಕೇಳಲೆ.', grounded: 'ಆಯ್ಕೆ ಮಲ್ತಿನ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಡ್ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಕ್ಕಿಜಿ. ಬೆಳೆ, ಋತು, ಮಣ್ಣ್, ಡ್ರೈನೇಜ್, ಕೀಟ, ಯೋಜನೆ ಅತ್ತ್ಂಡ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಲೆ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಲೆ', close: 'ಸಹಾಯಕನ್ ಮುಚ್ಚಲೆ' }
 };
 
 function buildSections(content) {
@@ -34,11 +34,19 @@ function buildSections(content) {
 
 const VECTOR_DB_NAME = 'krishi-vector-database';
 const VECTOR_STORE_NAME = 'guide-sections';
+const MAX_RETRIEVED_SECTIONS = 4;
+const SEMANTIC_RELEVANCE_THRESHOLD = 0.32;
 let embedderPromise;
 
 function getEmbedder() {
   embedderPromise ||= pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
   return embedderPromise;
+}
+
+async function getContentHash(section) {
+  const data = new TextEncoder().encode(`${section.heading}\n${section.content}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function openVectorDatabase() {
@@ -63,7 +71,7 @@ async function writeVectorIndex(language, sections) {
   const embed = await getEmbedder();
   const vectors = await Promise.all(sections.map(async (section, index) => {
     const output = await embed(`${section.heading}\n${section.content}`, { pooling: 'mean', normalize: true });
-    return { id: `${language}-${index}`, language, heading: section.heading, content: section.content, vector: Array.from(output.data) };
+    return { id: `${language}-${index}`, language, heading: section.heading, content: section.content, contentHash: await getContentHash(section), vector: Array.from(output.data) };
   }));
   const database = await openVectorDatabase();
   await new Promise((resolve, reject) => {
@@ -81,7 +89,8 @@ async function writeVectorIndex(language, sections) {
 
 async function getVectorIndex(language, sections) {
   const stored = await readVectorIndex(language);
-  const isCurrent = stored.length === sections.length && stored.every((entry, index) => entry.heading === sections[index].heading);
+  const currentHashes = await Promise.all(sections.map(getContentHash));
+  const isCurrent = stored.length === sections.length && stored.every((entry, index) => entry.heading === sections[index].heading && entry.contentHash === currentHashes[index]);
   return isCurrent ? stored : writeVectorIndex(language, sections);
 }
 
@@ -107,7 +116,7 @@ function findKeywordAnswer(question, sections) {
     const score = terms.reduce((total, term) => total + (headingTerms.has(term) ? 4 : contentTerms.has(term) ? 1 : 0), 0);
     return { ...section, score };
   }).sort((first, second) => second.score - first.score);
-  return ranked[0]?.score ? ranked[0] : null;
+  return ranked[0]?.score ? ranked.slice(0, MAX_RETRIEVED_SECTIONS) : [];
 }
 
 async function findSemanticAnswer(question, language, sections) {
@@ -116,11 +125,22 @@ async function findSemanticAnswer(question, language, sections) {
     const output = await embed(question, { pooling: 'mean', normalize: true });
     const questionVector = Array.from(output.data);
     const index = await getVectorIndex(language, sections);
-    return index.map((entry) => ({ ...entry, score: cosineSimilarity(questionVector, entry.vector) }))
-      .sort((first, second) => second.score - first.score)[0] || null;
+    const ranked = index.map((entry) => ({ ...entry, score: cosineSimilarity(questionVector, entry.vector) }))
+      .sort((first, second) => second.score - first.score);
+    return ranked[0]?.score >= SEMANTIC_RELEVANCE_THRESHOLD ? ranked.slice(0, MAX_RETRIEVED_SECTIONS) : [];
   } catch {
     return findKeywordAnswer(question, sections);
   }
+}
+
+async function askLatest(question, language, localMatches) {
+  const response = await fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, language, localContext: localMatches.map(({ heading, content }) => ({ heading, content })) })
+  });
+  if (!response.ok) throw new Error('Latest information is unavailable');
+  return response.json();
 }
 
 export default function App() {
@@ -128,6 +148,8 @@ export default function App() {
   const [chatOpen, setChatOpen] = useState(true);
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState([]);
+  const [mode, setMode] = useState('guide');
+  const [asking, setAsking] = useState(false);
   const [indexStatus, setIndexStatus] = useState('loading');
   const currentLabels = labels[lang];
   const sections = useMemo(() => buildSections(guides[lang].content), [lang]);
@@ -149,13 +171,22 @@ export default function App() {
   async function ask(value = question) {
     const trimmed = value.trim();
     if (!trimmed) return;
-    const match = await findSemanticAnswer(trimmed, lang, sections);
-    setMessages((previous) => [...previous, {
-      question: trimmed,
-      answer: match?.content.replace(/^##\s+.*$/m, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').trim() || currentLabels.empty,
-      source: match?.heading
-    }]);
-    setQuestion('');
+    setAsking(true);
+    try {
+      const matches = await findSemanticAnswer(trimmed, lang, sections);
+      const latest = mode === 'latest' ? await askLatest(trimmed, lang, matches) : null;
+      setMessages((previous) => [...previous, {
+        question: trimmed,
+        answer: latest?.answer || (matches.length ? matches.map((match) => match.content.replace(/^##\s+.*$/m, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').trim()).join('\n\n') : currentLabels.empty),
+        source: latest?.sources?.map((source) => source.title).join(' · ') || (matches.length ? matches.map((match) => match.heading).join(' · ') : null),
+        updatedAt: latest?.updatedAt
+      }]);
+      setQuestion('');
+    } catch {
+      setMessages((previous) => [...previous, { question: trimmed, answer: 'Current information could not be retrieved. Try Guide answer mode or verify the official source directly.' }]);
+    } finally {
+      setAsking(false);
+    }
   }
 
   return (
@@ -180,13 +211,14 @@ export default function App() {
           <article className="markdown-content"><ReactMarkdown remarkPlugins={[remarkGfm]}>{guides[lang].content}</ReactMarkdown></article>
         </section>
         {chatOpen && <aside className="chat-panel" aria-label={currentLabels.title}>
-          <div className="chat-header"><div className="chat-title"><span className="chat-icon"><MessageCircle size={18} /></span><div><strong>{currentLabels.title}</strong><small>{currentLabels.subtitle}</small></div></div><button className="icon-button" onClick={() => setChatOpen(false)} aria-label={currentLabels.close}><X size={18} /></button></div>
+          <div className="chat-header"><div className="chat-title"><span className="chat-icon"><MessageCircle size={18} /></span><div><strong>{currentLabels.title}</strong><small>{mode === 'latest' ? currentLabels.latestSubtitle : currentLabels.subtitle}</small></div></div><button className="icon-button" onClick={() => setChatOpen(false)} aria-label={currentLabels.close}><X size={18} /></button></div>
           <div className="chat-body">
+            <div className="mode-switcher" role="group" aria-label="Answer mode"><button className={mode === 'guide' ? 'mode-button active' : 'mode-button'} onClick={() => setMode('guide')}>{currentLabels.guide}</button><button className={mode === 'latest' ? 'mode-button active' : 'mode-button'} onClick={() => setMode('latest')}>{currentLabels.latest}</button></div>
             <div className="assistant-message"><span className="mini-avatar"><Sparkles size={14} /></span><p>{currentLabels.welcome}</p></div>
-            {messages.map((message, index) => <div className="message-group" key={`${message.question}-${index}`}><div className="user-message">{message.question}</div><div className="assistant-message"><span className="mini-avatar"><Sparkles size={14} /></span><div><p>{message.answer}</p>{message.source && <small className="citation"><BookOpen size={13} /> {currentLabels.sources}: {message.source}</small>}</div></div></div>)}
+            {messages.map((message, index) => <div className="message-group" key={`${message.question}-${index}`}><div className="user-message">{message.question}</div><div className="assistant-message"><span className="mini-avatar"><Sparkles size={14} /></span><div><p>{message.answer}</p>{message.source && <small className="citation"><BookOpen size={13} /> {currentLabels.sources}: {message.source}</small>}{message.updatedAt && <small className="citation">Updated: {new Date(message.updatedAt).toLocaleString()}</small>}</div></div></div>)}
             <div className="suggestion-list">{suggestions[lang].map((suggestion) => <button key={suggestion} className="suggestion" onClick={() => ask(suggestion)}>{suggestion}<ChevronRight size={15} /></button>)}</div>
           </div>
-          <form className="chat-input" onSubmit={(event) => { event.preventDefault(); ask(); }}><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder={currentLabels.placeholder} aria-label={currentLabels.placeholder} /><button type="submit" aria-label="Send question"><Send size={17} /></button></form>
+          <form className="chat-input" onSubmit={(event) => { event.preventDefault(); ask(); }}><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder={currentLabels.placeholder} aria-label={currentLabels.placeholder} disabled={asking} /><button type="submit" aria-label="Send question" disabled={asking}><Send size={17} /></button></form>
           <div className="grounding-note"><span className="status-dot" /> {indexStatus === 'loading' ? 'Preparing semantic search...' : currentLabels.grounded}</div>
         </aside>}
         {!chatOpen && <button className="reopen-chat" onClick={() => setChatOpen(true)}><MessageCircle size={18} /> {currentLabels.title}</button>}
