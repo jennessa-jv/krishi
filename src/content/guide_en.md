@@ -21,21 +21,21 @@ Not every plot supports all three seasons — Kolake in particular depends on as
 ## 5. Paddy Varieties and Field Practices
 Choose short-to-medium duration varieties suited to heavy rainfall and humid conditions for the Karthika season, since long-duration varieties raise the risk of lodging and fungal disease during peak monsoon. For Suggi and Kolake, when rainfall is lighter and more manageable, medium-duration high-yield varieties are generally more productive since disease pressure is lower.
 
-![Rice fields](/images/paddy.svg)
+![Rice fields](/images/paddy.jpeg)
 
 Good bunding and drainage channels around paddy fields are essential in this district — not to bring water in, but to control the excess and prevent standing water from becoming stagnant and disease-prone during the heaviest weeks of the monsoon. Keep field bunds well-maintained before the monsoon starts, since repairing them once the rains are underway is far harder.
 
 ## 6. Pulses in Paddy Fallows
 After the main paddy harvest, many farmers in the district plant pulses like greengram, blackgram, and horsegram directly into the paddy fallow, relying on the moisture still held in the soil rather than fresh irrigation. This is a low-cost, low-risk way to get a second harvest off the same land without the expense of a full second crop cycle.
 
-![Pulses](/images/pulses.svg)
+![Pulses](/images/pulses.png)
 
 These pulses also improve soil fertility by fixing nitrogen, which benefits the following paddy crop. If you have not tried fallow pulse cropping before, start on a small section of your paddy field after harvest — it requires minimal extra input and gives you a feel for the practice before committing your whole plot.
 
 ## 7. Areca Nut — the District's Signature Crop
 Areca nut (locally, adike) is the most economically important plantation crop in Dakshina Kannada, and the district is one of the leading areca-growing regions in India. It is a long-term investment: palms typically take five to seven years after planting before they begin bearing nuts, so this is a crop for farmers thinking in decades, not seasons.
 
-![Areca nut](/images/areca.svg)
+![Areca nut](/images/areca.png)
 
 Areca palms need warm, humid conditions with consistent rainfall and well-drained, organically rich loamy soil — they do poorly in waterlogged or saline ground, so site selection and drainage planning before planting matter enormously. A common recommended spacing is around 2.7 metres by 2.7 metres, though in the heaviest-rainfall pockets of this district, slightly wider spacing is often better since it improves air circulation and reduces disease pressure between palms.
 
@@ -53,7 +53,7 @@ Intercropping diversifies your income so that a poor season or price crash in on
 ## 9. Coconut Cultivation
 Coconut is grown across all three belts of the district and remains one of the most dependable and versatile crops in coastal Karnataka. It tolerates the heavy rainfall well provided drainage is adequate, and it pairs naturally with intercrops like cocoa, banana, and vegetables in its early years before the canopy closes in.
 
-![Coconut](/images/coconut.svg)
+![Coconut](/images/coconut.png)
 
 Watch particularly for white flies and leaf spot disease in coconut, which the local KVK identifies as major yield-limiting problems in this district. Recommended management includes proper, balanced fertilizer application alongside targeted insecticide and fungicide use only when needed, rather than routine spraying regardless of pest pressure. Regular inspection of the crown and fronds lets you catch early infestations before they spread across the plantation.
 
@@ -69,7 +69,7 @@ Post-harvest handling matters a great deal for cashew profitability — proper d
 ## 11. Black Pepper
 Black pepper is grown throughout the district, most commonly trained onto areca palms or dedicated support trees rather than as a standalone field crop, making it a natural partner to the areca-based farming systems already common here. It thrives in the same warm, humid, well-drained conditions that suit areca and coconut, which is exactly why the three are so often found growing together.
 
-![Black pepper](/images/pepper.svg)
+![Black pepper](/images/pepper.png)
 
 Quick wilt disease is one of the more serious problems pepper growers in this district face, and local agricultural research stations run active field trials on its management, reflecting how significant a threat it remains. Good drainage around the base of each vine, avoiding waterlogging during the monsoon, and prompt removal of any wilting vines to prevent spread are the most practical steps a grower can take. Avoid planting pepper in low pockets of a plantation where water tends to collect, since standing moisture around the root zone is what triggers this disease most often.
 
