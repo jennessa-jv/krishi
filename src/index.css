@@ -110,3 +110,7 @@ button, input { font: inherit; }
 .markdown-content h2 { color: var(--green); border-color: var(--line); }
 .markdown-content p, .markdown-content li { color: #526158; }
 .markdown-content strong { color: var(--green); }
+.mode-switcher { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px 34px; }
+.mode-button { border: 1px solid var(--line); border-radius: 5px; background: var(--cream); color: var(--muted); cursor: pointer; padding: 7px 9px; font-size: 11px; line-height: 1.2; white-space: nowrap; }
+.mode-button.active, .mode-button:hover { border-color: var(--green); color: var(--green); background: #f0f5ed; }
+.mode-button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }

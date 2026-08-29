@@ -20,9 +20,9 @@ const suggestions = {
 };
 
 const labels = {
-  en: { title: 'Ask Krishi', subtitle: 'Answers from your farming guide', latestSubtitle: 'Current sources with citations', placeholder: 'Ask about crops, soil, water or schemes...', welcome: 'Hello. Ask me about farming in Dakshina Kannada.', grounded: 'Grounded in your selected guide', latest: 'Latest information', guide: 'Guide answer', sources: 'Source', empty: 'I could not find a close match in this guide. Try asking about a crop, season, soil, drainage, pests, schemes or markets.', open: 'Open guide', close: 'Close assistant' },
-  kn: { title: 'ಕೃಷಿಯನ್ನು ಕೇಳಿ', subtitle: 'ನಿಮ್ಮ ಕೃಷಿ ಮಾರ್ಗದರ್ಶಿಯಿಂದ ಉತ್ತರಗಳು', latestSubtitle: 'ಪ್ರಸ್ತುತ ಮೂಲಗಳು ಮತ್ತು ಉಲ್ಲೇಖಗಳು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣು, ನೀರು ಅಥವಾ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿಯ ಬಗ್ಗೆ ಕೇಳಿ.', grounded: 'ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಯಲ್ಲಿ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಗಲಿಲ್ಲ. ಬೆಳೆ, ಋತು, ಮಣ್ಣು, ಒಳಚರಂಡಿ, ಕೀಟ, ಯೋಜನೆ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಿ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಯಿರಿ', close: 'ಸಹಾಯಕನನ್ನು ಮುಚ್ಚಿ' },
-  tcy: { title: 'ಕೃಷಿನ್ ಕೇಳಲೆ', subtitle: 'ನಿಕ್ಲೆನ ಮಾರ್ಗದರ್ಶಿರ್ದ್ ಉತ್ತರ', latestSubtitle: 'ಇತ್ತೀಚಿನ ಮೂಲೊಲು ಅತ್ತ್ಂಡ ಉಲ್ಲೇಖೊಲು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣ್, ನೀರ್ ಅತ್ತ್ಂಡ ಯೋಜನೆ ಬಗ್ಗೆ ಕೇಳಲೆ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿದ ಬಗ್ಗೆ ಕೇಳಲೆ.', grounded: 'ಆಯ್ಕೆ ಮಲ್ತಿನ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಡ್ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಕ್ಕಿಜಿ. ಬೆಳೆ, ಋತು, ಮಣ್ಣ್, ಡ್ರೈನೇಜ್, ಕೀಟ, ಯೋಜನೆ ಅತ್ತ್ಂಡ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಲೆ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಲೆ', close: 'ಸಹಾಯಕನ್ ಮುಚ್ಚಲೆ' }
+  en: { title: 'Ask Krishi', subtitle: 'Answers from your farming guide', latestSubtitle: 'Current sources with citations', placeholder: 'Ask about crops, soil, water or schemes...', welcome: 'Hello. Ask me about farming in Dakshina Kannada.', greeting: 'Hello. How can I help with your farm today?', grounded: 'Grounded in your selected guide', latest: 'Latest information', guide: 'Guide answer', sources: 'Source', empty: 'I could not find a close match in this guide. Try asking about a crop, season, soil, drainage, pests, schemes or markets.', open: 'Open guide', close: 'Close assistant' },
+  kn: { title: 'ಕೃಷಿಯನ್ನು ಕೇಳಿ', subtitle: 'ನಿಮ್ಮ ಕೃಷಿ ಮಾರ್ಗದರ್ಶಿಯಿಂದ ಉತ್ತರಗಳು', latestSubtitle: 'ಪ್ರಸ್ತುತ ಮೂಲಗಳು ಮತ್ತು ಉಲ್ಲೇಖಗಳು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣು, ನೀರು ಅಥವಾ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿಯ ಬಗ್ಗೆ ಕೇಳಿ.', greeting: 'ನಮಸ್ಕಾರ. ಇಂದು ನಿಮ್ಮ ಕೃಷಿಗೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?', grounded: 'ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಯಲ್ಲಿ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಗಲಿಲ್ಲ. ಬೆಳೆ, ಋತು, ಮಣ್ಣು, ಒಳಚರಂಡಿ, ಕೀಟ, ಯೋಜನೆ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಿ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಯಿರಿ', close: 'ಸಹಾಯಕನನ್ನು ಮುಚ್ಚಿ' },
+  tcy: { title: 'ಕೃಷಿನ್ ಕೇಳಲೆ', subtitle: 'ನಿಕ್ಲೆನ ಮಾರ್ಗದರ್ಶಿರ್ದ್ ಉತ್ತರ', latestSubtitle: 'ಇತ್ತೀಚಿನ ಮೂಲೊಲು ಅತ್ತ್ಂಡ ಉಲ್ಲೇಖೊಲು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣ್, ನೀರ್ ಅತ್ತ್ಂಡ ಯೋಜನೆ ಬಗ್ಗೆ ಕೇಳಲೆ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿದ ಬಗ್ಗೆ ಕೇಳಲೆ.', greeting: 'ನಮಸ್ಕಾರ. ಈ ದಿನ ಉಮೆರ್ ಕೃಷಿಗ್ ಯಾನ್ ಎಂಚ ಸಹಾಯ ಮಲ್ಪೊಲಿ?', grounded: 'ಆಯ್ಕೆ ಮಲ್ತಿನ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಡ್ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಕ್ಕಿಜಿ. ಬೆಳೆ, ಋತು, ಮಣ್ಣ್, ಡ್ರೈನೇಜ್, ಕೀಟ, ಯೋಜನೆ ಅತ್ತ್ಂಡ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಲೆ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಲೆ', close: 'ಸಹಾಯಕನ್ ಮುಚ್ಚಲೆ' }
 };
 
 function buildSections(content) {
@@ -98,6 +98,10 @@ function cosineSimilarity(first, second) {
   return first.reduce((total, value, index) => total + value * second[index], 0);
 }
 
+function isGreeting(question) {
+  return /^(hi|hello|hey|ನಮಸ್ಕಾರ|ನಮಸ್ತೆ)\s*[!.?]*$/iu.test(question);
+}
+
 function findKeywordAnswer(question, sections) {
   const stopWords = new Set(['what', 'which', 'how', 'can', 'are', 'the', 'for', 'about', 'from', 'and', 'you', 'your', 'present']);
   const relatedTerms = {
@@ -127,7 +131,9 @@ async function findSemanticAnswer(question, language, sections) {
     const index = await getVectorIndex(language, sections);
     const ranked = index.map((entry) => ({ ...entry, score: cosineSimilarity(questionVector, entry.vector) }))
       .sort((first, second) => second.score - first.score);
-    return ranked[0]?.score >= SEMANTIC_RELEVANCE_THRESHOLD ? ranked.slice(0, MAX_RETRIEVED_SECTIONS) : [];
+    return ranked[0]?.score >= SEMANTIC_RELEVANCE_THRESHOLD
+      ? ranked.slice(0, MAX_RETRIEVED_SECTIONS)
+      : findKeywordAnswer(question, sections);
   } catch {
     return findKeywordAnswer(question, sections);
   }
@@ -171,10 +177,15 @@ export default function App() {
   async function ask(value = question) {
     const trimmed = value.trim();
     if (!trimmed) return;
+    if (isGreeting(trimmed)) {
+      setMessages((previous) => [...previous, { question: trimmed, answer: currentLabels.greeting }]);
+      setQuestion('');
+      return;
+    }
     setAsking(true);
     try {
       const matches = await findSemanticAnswer(trimmed, lang, sections);
-      const latest = mode === 'latest' ? await askLatest(trimmed, lang, matches) : null;
+      const latest = mode === 'latest' || !matches.length ? await askLatest(trimmed, lang, matches) : null;
       setMessages((previous) => [...previous, {
         question: trimmed,
         answer: latest?.answer || (matches.length ? matches.map((match) => match.content.replace(/^##\s+.*$/m, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').trim()).join('\n\n') : currentLabels.empty),
