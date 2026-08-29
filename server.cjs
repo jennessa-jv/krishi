@@ -1,4 +1,6 @@
+const fs = require('node:fs');
 const http = require('node:http');
+const path = require('node:path');
 require('dotenv').config();
 
 const port = Number(process.env.PORT || 8787);
@@ -9,6 +11,79 @@ const ollamaBaseUrl = (process.env.OLLAMA_BASE_URL || '').trim();
 const ollamaModel = (process.env.OLLAMA_MODEL || '').trim();
 const MAX_SOURCE_CHARACTERS = 8000;
 const MAX_LOCAL_CONTEXT_CHARACTERS = 12000;
+const DIST_DIR = path.join(__dirname, 'dist');
+const distExists = fs.existsSync(DIST_DIR);
+
+function getMimeType(filePath) {
+  const extension = path.extname(filePath).toLowerCase();
+  const mimeTypes = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.gif': 'image/gif',
+    '.ico': 'image/x-icon',
+    '.txt': 'text/plain; charset=utf-8',
+    '.map': 'application/json; charset=utf-8',
+  };
+  return mimeTypes[extension] || 'application/octet-stream';
+}
+
+function serveStaticFile(response, filePath) {
+  fs.readFile(filePath, (error, fileBuffer) => {
+    if (error) {
+      response.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+      response.end('Static file error');
+      return;
+    }
+
+    response.writeHead(200, {
+      'Content-Type': getMimeType(filePath),
+      'Cache-Control': 'no-store',
+    });
+    response.end(fileBuffer);
+  });
+}
+
+function serveFrontend(request, response) {
+  if (!distExists) {
+    response.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify({ error: 'Frontend build not found. Run npm run build first.' }));
+    return;
+  }
+
+  const requestPath = decodeURIComponent((request.url || '/').split('?')[0]);
+  const normalizedPath = requestPath === '/' ? '/index.html' : requestPath;
+  const relativePath = normalizedPath.replace(/^\/+/, '');
+  const resolvedPath = path.join(DIST_DIR, relativePath);
+
+  if (!resolvedPath.startsWith(DIST_DIR)) {
+    response.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    response.end('Forbidden');
+    return;
+  }
+
+  fs.stat(resolvedPath, (error, stats) => {
+    if (!error && stats.isFile()) {
+      serveStaticFile(response, resolvedPath);
+      return;
+    }
+
+    const fallbackPath = path.join(DIST_DIR, 'index.html');
+    fs.stat(fallbackPath, (fallbackError) => {
+      if (fallbackError) {
+        response.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+        response.end(JSON.stringify({ error: 'Frontend entry not found.' }));
+        return;
+      }
+      serveStaticFile(response, fallbackPath);
+    });
+  });
+}
 
 function send(response, status, body) {
   response.writeHead(status, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
@@ -136,22 +211,34 @@ const server = http.createServer(async (request, response) => {
     response.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' });
     return response.end();
   }
-  if (request.method !== 'POST' || request.url !== '/api/ask') return send(response, 404, { error: 'Not found' });
-  let body = '';
-  for await (const chunk of request) body += chunk;
-  try {
-    const { question, language = 'en', localContext = [] } = JSON.parse(body);
-    if (typeof question !== 'string' || !question.trim()) return send(response, 400, { error: 'Question is required' });
-    let liveSource = null;
+
+  if (request.method === 'POST' && request.url === '/api/ask') {
+    let body = '';
+    for await (const chunk of request) body += chunk;
     try {
-      liveSource = await readSource(question);
+      const { question, language = 'en', localContext = [] } = JSON.parse(body);
+      if (typeof question !== 'string' || !question.trim()) return send(response, 400, { error: 'Question is required' });
+      let liveSource = null;
+      try {
+        liveSource = await readSource(question);
+      } catch (error) {
+        console.warn(`Live source unavailable: ${error.message}`);
+      }
+      return send(response, 200, await generateAnswer(question.trim(), language, Array.isArray(localContext) ? localContext : [], liveSource));
     } catch (error) {
-      console.warn(`Live source unavailable: ${error.message}`);
+      return send(response, 503, { error: 'Current information is unavailable', detail: error.message });
     }
-    return send(response, 200, await generateAnswer(question.trim(), language, Array.isArray(localContext) ? localContext : [], liveSource));
-  } catch (error) {
-    return send(response, 503, { error: 'Current information is unavailable', detail: error.message });
   }
+
+  if (request.method === 'GET' && distExists) {
+    return serveFrontend(request, response);
+  }
+
+  if (request.method === 'GET' && !distExists) {
+    return send(response, 404, { error: 'Not found' });
+  }
+
+  return send(response, 404, { error: 'Not found' });
 });
 
-server.listen(port, () => console.log(`Krishi API listening on http://localhost:${port}`));
+server.listen(port, () => console.log(`Krishi app listening on http://localhost:${port}`));
