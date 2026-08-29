@@ -2,9 +2,11 @@ const http = require('node:http');
 require('dotenv').config();
 
 const port = Number(process.env.PORT || 8787);
-const llmUrl = process.env.LLM_API_URL;
-const llmApiKey = process.env.LLM_API_KEY;
-const llmModel = process.env.LLM_MODEL || 'gpt-4o-mini';
+const llmUrl = (process.env.LLM_API_URL || '').trim();
+const llmApiKey = (process.env.LLM_API_KEY || process.env.LM_API_KEY || process.env.OPENAI_API_KEY || '').trim();
+const llmModel = (process.env.LLM_MODEL || 'gpt-4o-mini').trim();
+const ollamaBaseUrl = (process.env.OLLAMA_BASE_URL || '').trim();
+const ollamaModel = (process.env.OLLAMA_MODEL || '').trim();
 const MAX_SOURCE_CHARACTERS = 8000;
 const MAX_LOCAL_CONTEXT_CHARACTERS = 12000;
 
@@ -24,6 +26,23 @@ function getSourceConfig(question) {
   return sourceGroups.find((group) => group.url && group.terms.some((term) => normalizedQuestion.includes(term))) || (process.env.LIVE_SOURCE_URL ? { url: process.env.LIVE_SOURCE_URL, title: process.env.LIVE_SOURCE_TITLE } : null);
 }
 
+function cleanTextContent(value) {
+  if (!value || typeof value !== 'string') return '';
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 async function readSource(question) {
   const sourceConfig = getSourceConfig(question);
   if (!sourceConfig) return null;
@@ -32,13 +51,26 @@ async function readSource(question) {
   if (!response.ok) throw new Error(`Live source returned ${response.status}`);
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('json') ? await response.json() : await response.text();
-  return { title: sourceConfig.title || new URL(sourceUrl).hostname, url: sourceUrl, type: 'live', retrievedAt: new Date().toISOString(), content: typeof data === 'string' ? data : JSON.stringify(data) };
+  const content = typeof data === 'string' ? data : JSON.stringify(data);
+  return { title: sourceConfig.title || new URL(sourceUrl).hostname, url: sourceUrl, type: 'live', retrievedAt: new Date().toISOString(), content: cleanTextContent(content) };
+}
+
+function buildGuideFallbackAnswer(question, fallbackText) {
+  const cleanedText = cleanTextContent(fallbackText || '');
+  const snippet = cleanedText
+    ? cleanedText.slice(0, 500).replace(/\s+/g, ' ').trim()
+    : 'The available farming guidance contains practical advice for this topic.';
+
+  const isGeneralAgricultureQuestion = /^(what|which|how|why|when|where|can|should|is|are|do|does)\b|north\s*india|punjab|haryana|uttar\s*pradesh|delhi|himachal|uttarakhand|kashmir|bihar|west\s*india|east\s*india|india|general|overall/i.test(question || '');
+  const regionalNote = isGeneralAgricultureQuestion
+    ? '\n\nThis appears to be a general agriculture question, so the answer is best treated as general guidance rather than a Dakshina Kannada-specific recommendation.'
+    : '';
+
+  return `I could not verify live data from the available source for this question. Based on the available farming guidance and general agronomic principles, the best answer is: ${snippet}${regionalNote}${question ? `\n\nFor the question “${question}”, it is best to compare the guidance with local agronomy and the latest official regional source before making a time-sensitive farming decision.` : ''}`;
 }
 
 async function generateAnswer(question, language, localContext, liveSource) {
-  if (!llmUrl || !llmApiKey) throw new Error('LLM provider is not configured');
-  const languageName = { en: 'English', kn: 'Kannada', tcy: 'Tulu' }[language] || 'English';
-  const sources = [liveSource && { ...liveSource, content: liveSource.content.slice(0, MAX_SOURCE_CHARACTERS) }, ...localContext.map((entry) => ({ title: entry.heading, type: 'local guide', content: entry.content }))].filter(Boolean);
+  const sources = [liveSource && { ...liveSource, content: cleanTextContent(liveSource.content).slice(0, MAX_SOURCE_CHARACTERS) }, ...localContext.map((entry) => ({ title: entry.heading, type: 'local guide', content: cleanTextContent(entry.content) }))].filter(Boolean);
   let localCharacters = 0;
   const boundedSources = sources.map((source) => {
     if (source.type !== 'local guide') return source;
@@ -48,19 +80,55 @@ async function generateAnswer(question, language, localContext, liveSource) {
     return { ...source, content };
   }).filter((source) => source.content);
   const context = boundedSources.map((source) => `[${source.title}]\n${source.content}`).join('\n\n');
-  const response = await fetch(llmUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${llmApiKey}` },
-    body: JSON.stringify({ model: llmModel, temperature: 0.1, messages: [
-      { role: 'system', content: `You are a helpful multilingual assistant for farmers in Dakshina Kannada. Reply in ${languageName}. Answer general knowledge, greetings, geography, explanations, and casual questions normally. For current or high-stakes claims about weather, prices, schemes, pests, diseases, or agriculture, use only the supplied sources; never invent facts, prices, rules, dates, or links. Cite time-sensitive claims using the source title and say when current data is unavailable.\n\nSources:\n${context || 'No live or local source was available for this question.'}` },
-      { role: 'user', content: question },
-    ] }),
-  });
-  if (!response.ok) throw new Error(`LLM provider returned ${response.status}`);
-  const result = await response.json();
-  const answer = result.choices?.[0]?.message?.content;
-  if (!answer) throw new Error('LLM returned no answer');
-  return { answer, sources: boundedSources, updatedAt: liveSource?.retrievedAt || new Date().toISOString() };
+  const localGuideText = boundedSources.filter((source) => source.type === 'local guide').map((source) => source.content).join('\n\n');
+  const fallbackAnswer = buildGuideFallbackAnswer(question, localGuideText || (liveSource ? liveSource.content : ''));
+
+  if (!llmUrl && !ollamaBaseUrl) {
+    return { answer: fallbackAnswer, sources: boundedSources, updatedAt: liveSource?.retrievedAt || new Date().toISOString() };
+  }
+
+  const languageName = { en: 'English', kn: 'Kannada', tcy: 'Tulu' }[language] || 'English';
+  const regionContext = /north\s*india|punjab|haryana|uttar\s*pradesh|delhi|himachal|uttarakhand|kashmir|bihar|west\s*india|east\s*india|india/i.test(question)
+    ? 'If the question is about another region such as North India, answer as general agricultural guidance and clearly label it as regional rather than Dakshina Kannada-specific advice.'
+    : 'Answer general agricultural questions normally. Keep guidance centered on Dakshina Kannada only when the question is clearly local; otherwise answer generally and explain any regional limitation clearly.';
+  const requestUrl = ollamaBaseUrl ? `${ollamaBaseUrl.replace(/\/$/, '')}/api/chat` : llmUrl;
+  const requestHeaders = {
+    'Content-Type': 'application/json',
+    ...(ollamaBaseUrl ? {} : { Authorization: `Bearer ${llmApiKey}` })
+  };
+  const requestBody = ollamaBaseUrl
+    ? {
+        model: ollamaModel || 'llama3.1',
+        messages: [
+          { role: 'system', content: `You are a helpful multilingual assistant for farmers. Reply in ${languageName}. ${regionContext} Use only the supplied sources when discussing current or high-stakes claims. If current information is unavailable, say so and base the answer on the available guide or general agricultural knowledge without inventing facts.` },
+          { role: 'user', content: `Question: ${question}\n\nSources:\n${context || 'No local source was available for this question.'}` },
+        ],
+        stream: false,
+      }
+    : {
+        model: llmModel,
+        temperature: 0.1,
+        messages: [
+          { role: 'system', content: `You are a helpful multilingual assistant for farmers. Reply in ${languageName}. ${regionContext} Answer general knowledge, greetings, geography, explanations, and casual questions normally. For current or high-stakes claims about weather, prices, schemes, pests, diseases, or agriculture, use only the supplied sources; never invent facts, prices, rules, dates, or links. Cite time-sensitive claims using the source title and say when current data is unavailable.\n\nSources:\n${context || 'No live or local source was available for this question.'}` },
+          { role: 'user', content: question },
+        ]
+      };
+
+  try {
+    const response = await fetch(requestUrl, {
+      method: 'POST',
+      headers: requestHeaders,
+      body: JSON.stringify(requestBody),
+    });
+    if (!response.ok) throw new Error(`LLM provider returned ${response.status}`);
+    const result = await response.json();
+    const answer = ollamaBaseUrl ? result.message?.content : result.choices?.[0]?.message?.content;
+    if (!answer) throw new Error('LLM returned no answer');
+    return { answer, sources: boundedSources, updatedAt: liveSource?.retrievedAt || new Date().toISOString() };
+  } catch (error) {
+    console.warn(`LLM request failed; using guide fallback: ${error.message}`);
+    return { answer: fallbackAnswer, sources: boundedSources, updatedAt: liveSource?.retrievedAt || new Date().toISOString() };
+  }
 }
 
 const server = http.createServer(async (request, response) => {
