@@ -34,7 +34,7 @@ function buildSections(content) {
 
 const VECTOR_DB_NAME = 'krishi-vector-database';
 const VECTOR_STORE_NAME = 'guide-sections';
-const MAX_RETRIEVED_SECTIONS = 4;
+const MAX_RETRIEVED_SECTIONS = 3;
 const SEMANTIC_RELEVANCE_THRESHOLD = 0.32;
 let embedderPromise;
 
@@ -175,31 +175,51 @@ export default function App() {
   }
 
   async function ask(value = question) {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    if (isGreeting(trimmed)) {
-      setMessages((previous) => [...previous, { question: trimmed, answer: currentLabels.greeting }]);
-      setQuestion('');
-      return;
-    }
-    setAsking(true);
-    try {
-      const matches = await findSemanticAnswer(trimmed, lang, sections);
-      const latest = mode === 'latest' || !matches.length ? await askLatest(trimmed, lang, matches) : null;
-      setMessages((previous) => [...previous, {
+  const trimmed = value.trim();
+  if (!trimmed) return;
+
+  if (isGreeting(trimmed)) {
+    setMessages((previous) => [
+      ...previous,
+      {
         question: trimmed,
-        answer: latest?.answer || (matches.length ? matches.map((match) => match.content.replace(/^##\s+.*$/m, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').trim()).join('\n\n') : currentLabels.empty),
-        source: latest?.sources?.map((source) => source.title).join(' · ') || (matches.length ? matches.map((match) => match.heading).join(' · ') : null),
-        updatedAt: latest?.updatedAt
-      }]);
-      setQuestion('');
-    } catch {
-      setMessages((previous) => [...previous, { question: trimmed, answer: 'Current information could not be retrieved. Try Guide answer mode or verify the official source directly.' }]);
-    } finally {
-      setAsking(false);
-    }
+        answer: currentLabels.greeting
+      }
+    ]);
+    setQuestion('');
+    return;
   }
 
+  setAsking(true);
+
+  try {
+    const matches = await findSemanticAnswer(trimmed, lang, sections);
+
+    const result = await askLatest(
+      trimmed,
+      lang,
+      matches
+    );
+
+    setMessages((previous) => [
+      ...previous,
+      {
+        question: trimmed,
+        answer: result.answer,
+        source: matches.length
+          ? matches.map((match) => match.heading).join(' · ')
+          : null
+      }
+    ]);
+
+    setQuestion('');
+  }  catch (error) {
+  console.error(error);
+  }
+   finally {
+    setAsking(false);
+  }
+}
   return (
     <div className="app-shell">
       <nav className="topbar">
