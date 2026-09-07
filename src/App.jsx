@@ -140,7 +140,7 @@ async function findSemanticAnswer(question, language, sections) {
 }
 
 async function askLatest(question, language, localMatches) {
-  const response = await fetch('/api/ask', {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ question, language, localContext: localMatches.map(({ heading, content }) => ({ heading, content })) })
