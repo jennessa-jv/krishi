@@ -22,7 +22,7 @@ The narrow scope is also an engineering decision. A smaller, reviewed corpus mak
 2. They ask a free-text question or tap a suggested question.
 3. The browser retrieves up to three relevant sections from the selected language guide.
 4. The client sends the question, language, and retrieved excerpts to `/api/ask`.
-5. The server calls the configured LLM without exposing the API key, and the UI displays the answer with the retrieved section headings.
+5. The server calls the configured LLM without exposing the API key, and the UI displays the answer with the retrieved section headings. Users can report an answer as outdated, unsafe, or unclear; the report is linked to its guide release and retrieved sections.
 
 Important qualification: the current Guide/Latest toggle only changes visual state. Both modes presently use the API route. I would say this directly rather than describe an unimplemented feature as working.
 
@@ -46,19 +46,19 @@ Grounding is helpful, but the current product does not enforce it strictly. The 
 
 ### Requirements, reliability, and success measures
 
-Functional requirements are multilingual guide rendering, language switching, semantic/keyword retrieval, persistent local vectors, suggested questions, chat requests, and a server-side key boundary. Non-functional requirements are responsive performance, graceful fallback when browser ML or IndexedDB fails, privacy-conscious data handling, accessible controls, low-bandwidth resilience, and consistent multilingual content.
+Functional requirements are multilingual guide rendering, language switching, semantic/keyword retrieval, persistent local vectors, suggested questions, chat requests, a server-side key boundary, versioned guide releases, and answer feedback. Non-functional requirements are responsive performance, graceful fallback when browser ML or IndexedDB fails, privacy-conscious data handling, accessible controls, low-bandwidth resilience, consistent multilingual content, and safe content updates without an availability gap.
 
 The static guide has independent value: it remains readable even when the LLM, embedding model, API key, or network is unavailable. Suggested questions reduce the blank-page problem, demonstrate useful topics, and help users ask questions that the current corpus can answer well.
 
-I would measure usefulness with optional answer ratings, “did this help you decide?” feedback, no-match and escalation rates, repeat-question rate, time to an answer, retrieval relevance judged by reviewers, and follow-up completion such as a farmer opening a cited guide section. These metrics should be anonymized and never be used to infer sensitive farm economics without consent.
+The app now includes feedback categories for **outdated**, **unsafe**, and **unclear**, plus an optional reviewer comment. Each report records the answer ID, guide version, language, and retrieved section IDs, so a reviewer can trace it to the exact release. I would also measure no-match and escalation rates, repeat-question rate, time to answer, expert-labelled retrieval relevance, and follow-up completion. These metrics should be anonymized and never used to infer sensitive farm economics without consent.
 
 ### Assumptions, limitations, and next two weeks
 
 The prototype assumes a modern smartphone or desktop browser with JavaScript, IndexedDB, Web Crypto, and enough memory/network to download an embedding model at least once. It assumes that users can read one of the three languages or can seek help from a household member. Those are assumptions to validate, not guarantees.
 
-Current limitations include client-side model download and first-use latency, uneven language guides, a likely IndexedDB write-order bug, no visible request error state, no tests, minimal validation/rate limiting, no live retrieval, and no expert review workflow encoded in the product.
+Current limitations include client-side model download and first-use latency, uneven language guides, no visible request error/retry state, no tests, no rate limiting or upstream timeout, no live retrieval, and no expert review workflow encoded in the product. Feedback is persisted to a local NDJSON file for a single development server; production needs a shared database or review-ticket service.
 
-With two more weeks I would: (1) make Guide mode local-only and make Latest mode genuinely source-backed; (2) return stable source IDs, excerpts, dates, and confidence; (3) add visible errors/retry and a local fallback; (4) complete language parity; (5) add API limits, validation, timeouts, and tests; and (6) have an agronomist review high-risk content and escalation copy.
+With two more weeks I would: (1) make Guide mode local-only and make Latest mode genuinely source-backed; (2) return stable source IDs, excerpts, dates, and confidence; (3) add visible errors/retry and a local fallback; (4) complete language parity; (5) add rate limits, upstream timeouts, tests, and a durable feedback store; and (6) have an agronomist review high-risk content and escalation copy.
 
 ## 2. Front-end architecture and accessibility
 
@@ -120,13 +120,17 @@ Top-three is a practical context budget. Too few chunks can omit a necessary cav
 
 The keyword fallback tokenizes Unicode letters/numbers using `\p{L}` and `\p{N}`, so it does not assume ASCII. It removes a small English stop-word set, adds a few English related terms, scores heading hits as four and body hits as one, then takes up to three positive sections. Heading weighting emphasizes a deliberately named topic. Its limitations are clear: its stop words and synonym map are English-only, it has no morphology/spelling normalization, and it cannot understand Tulu or Kannada semantic variants well.
 
-### IndexedDB, hashes, and robustness
+### IndexedDB, hashes, versioning, and zero-downtime releases
 
-IndexedDB is chosen because vectors are sizeable structured data; `localStorage` is synchronous, string-only, small, and can harm UI responsiveness. Every section has a SHA-256 hash of heading plus content. On load, stored entries are current only if count, heading order, and each hash match the current sections. This invalidates changed text safely.
+IndexedDB is chosen because vectors are sizeable structured data; `localStorage` is synchronous, string-only, small, and can harm UI responsiveness. Every section has a SHA-256 hash of heading plus content. On load, stored entries are current only if count, heading order, section ID, and each hash match the current sections. This invalidates changed text safely.
 
-There is a flaw in `writeVectorIndex`: it queues `getAll()`, immediately queues `put()` calls, then queues deletion of old same-language entries inside the `getAll` success handler. IndexedDB requests are ordered within the transaction, so those later deletes can remove newly written records with the same IDs. Fix it by reading/deleting in one transaction and writing only after deletion requests have been queued, or use separate read/delete and write transactions. Add an index schema/version field to each record and increment the database version with an upgrade migration when the vector format, model, chunker, or hash strategy changes. Periodically remove records whose language/guide ID is no longer in the active manifest.
+The current implementation avoids the old delete-and-rewrite race by never overwriting a release in place. Vector IDs include `version:language:section`, and a release has its own version namespace. The app reads a configured manifest, downloads every language file for the proposed release, builds its indexes, and only then swaps the rendered release. Thus a user sees either the complete old release or the complete new one—not a mixture. The manifest is checked on load and every five minutes.
 
-If IndexedDB, Web Crypto, model load, or embedding fails, the catch path uses keyword retrieval. The UI currently presents the same “grounded” note after fallback, which is misleading; show “semantic search unavailable; keyword matching is in use.” Meaningful progress would report model download, guide vector count, and ready state. First-question latency can be reduced by idle-time preloading, lazy indexing after guide render, a cached model/service worker, and by not making greetings load the model.
+Publish immutable guide URLs such as `/guides/42/en.md` first, then atomically point the small active manifest to version 42. Keep the manifest uncached or on a short TTL and give immutable guide URLs a long cache lifetime. A rollback is a manifest change back to the prior healthy version; old guide/vector data remains usable. The Service Worker and Cache Storage preserve guide/version assets for offline reuse. This release process is documented in `GUIDE_RELEASES.md`.
+
+An index schema version should still be added when changing vector format, embedding model, chunking, or hash strategy. A scheduled cleanup policy can remove no-longer-referenced release namespaces only after the rollback window expires.
+
+If IndexedDB, Web Crypto, model load, or embedding fails, the catch path uses keyword retrieval. The UI now says “Keyword matching is in use” rather than claiming semantic grounding. Meaningful progress could still report model download percentage, guide vector count, and ready state. First-question latency can be reduced by idle-time preloading, lazy indexing after guide render, a cached model/service worker, and by not making greetings load the model.
 
 For many districts or thousands of documents, client-side embedding becomes expensive. Add metadata (district, crop, source author, review date, language, confidence, document version) and move embedding/search to a backend vector service when corpus size, security, observability, or update frequency requires it. A Service Worker can cache guides, app assets, and a previously downloaded model for better offline use; it should still expose freshness/version status.
 
@@ -134,9 +138,9 @@ For many districts or thousands of documents, client-side embedding becomes expe
 
 ### Why have a separate Node server? What does the endpoint do?
 
-The browser must never hold `LLM_API_KEY`: any user could inspect it and spend or abuse it. `server.cjs` provides a small trust boundary and reads `LLM_API_URL`, `LLM_API_KEY`, and optional `LLM_MODEL` from environment variables via `dotenv`. `POST /api/ask` accepts `{question, language = 'en', localContext = []}` and currently returns `{answer}`. During development, Vite proxies `/api` to port 8787, letting the frontend call a same-origin-looking path while the API runs separately.
+The browser must never hold `LLM_API_KEY`: any user could inspect it and spend or abuse it. `server.cjs` provides a small trust boundary and reads `LLM_API_URL`, `LLM_API_KEY`, and optional `LLM_MODEL` from environment variables via `dotenv`. `POST /api/ask` accepts a question, supported language, guide version, and up to three retrieved context sections; it returns an answer and the supplied guide version. `POST /api/feedback` accepts a bounded, structured answer-quality report. During development, Vite proxies `/api` to port 8787, letting the frontend call a same-origin-looking path while the API runs separately.
 
-If URL/key configuration is missing, the present code still tries `fetch` and ends in a generic error path. A production server should fail fast at startup with an actionable configuration error. `gpt-4o-mini` is merely the default configured model, not a hard dependency. Temperature 0.1 aims for consistent, low-creativity agricultural responses.
+If URL/key configuration is missing, `generateAnswer` now fails before attempting an upstream request, though the client still needs a clearer visible configuration/error state. A production server should also fail fast at startup with an actionable configuration error. `gpt-4o-mini` is merely the default configured model, not a hard dependency. Temperature 0.1 aims for consistent, low-creativity agricultural responses.
 
 ### How does prompting and context work? What is the trust issue?
 
@@ -144,9 +148,11 @@ The system prompt asks the model to answer in `language`, use relevant local con
 
 This is useful but not a strong trust boundary. A modified browser client can send arbitrary `localContext`, and guide content itself may contain instructions. For a stronger design, send only a guide ID and question; perform retrieval server-side from an approved, versioned corpus; treat retrieved text as data, delimit it, and instruct the model to ignore instructions contained within sources. Strict grounded mode should say “I do not have enough approved source information” rather than use general knowledge.
 
-### Citations, validation, errors, and modes
+### Citations, validation, feedback, errors, and modes
 
-The headings displayed by the UI are local retrieval labels, not model-verified citations. There are no external current sources. A robust API would return a typed response such as `{answer, sources:[{id, title, excerpt, url, publishedAt, guideVersion}], confidence, mode}` and make citations link to the exact guide section. For an LLM answer, validate that `choices` is an array and that `choices[0]?.message?.content` is a non-empty string before accessing it; otherwise return a controlled upstream-response error.
+The headings displayed by the UI are local retrieval labels, not model-verified citations. There are no external current sources. A robust API would return a typed response such as `{answer, sources:[{id, title, excerpt, url, publishedAt, guideVersion}], confidence, mode}` and make citations link to the exact guide section. The current server does validate that the provider returned a non-empty `choices[0].message.content` before returning it; malformed provider responses become a controlled server error.
+
+The feedback flow is intentionally traceable: the browser submits answer ID, guide version, language, retrieved section IDs, one of the allowed categories, and an optional comment. The development server validates and appends the report to `data/feedback.ndjson`, which is ignored by Git. That is sufficient for a single instance/demo, but it is not a durable multi-instance production store.
 
 The API explicitly returns 400 only for an empty question; all parse, provider, and shape failures become 500. Add 400 for invalid JSON/fields, 413 for oversized body, 429 for rate limits, 502 for a malformed/unavailable provider, and 504 for timeout. The client currently logs an error but displays nothing; it should preserve the question, show an error and retry button, and offer the local retrieved excerpts when possible.
 
@@ -154,7 +160,7 @@ The Guide/Latest mode must be made real. Guide mode should return only cited loc
 
 ### Production hardening and operations
 
-Validate maximum question length, allowed language (`en`, `kn`, `tcy`), `localContext` array type/count/field size, and total request-body bytes before accumulating it. Disable controls that can submit during `asking`, including suggestions, or use an `AbortController` and request sequence IDs. Apply per-IP/user rate limits, payload limits, request IDs, structured logs with redaction, and caching keyed by normalized question + language + guide/source version—never cache private conversational details indiscriminately.
+The server now bounds JSON request bodies to 64 KB; checks question presence/length, supported language (`en`, `kn`, `tcy`), local-context array count and field sizes; and returns 400 for invalid JSON/fields or 413 for oversized bodies. The client disables both the composer and suggested questions while a request is active. Remaining hardening includes per-IP/user rate limits, request IDs, structured logs with redaction, and caching keyed by normalized question + language + guide/source version—never cache private conversational details indiscriminately.
 
 Use upstream timeouts and bounded retries only for safe transient failures; support cancellation when the client disconnects. Streaming can be implemented with Server-Sent Events or a streamed fetch response, appending token deltas in the UI while preserving accessibility. Conversation history improves follow-up answers but increases cost, prompt-injection surface, and privacy exposure, so retain only user-consented, bounded history.
 
@@ -166,14 +172,14 @@ Tell users exactly what is sent to the provider: their question, selected langua
 
 - **Does the mode switch alter behavior?** No. `ask()` always calls `askLatest()`, which calls the LLM API. Implement a local-only Guide branch and a verified-source Latest branch.
 - **Are citations current/verifiable?** No. They are section headings from local matches. The app does not perform web/search retrieval.
-- **What happens after request failure?** The console logs an error and clears loading; the user sees no error, retry, or fallback. Add all three.
-- **Are simultaneous requests prevented?** Only composer input/submit are disabled. Suggested questions can still submit, creating concurrent ordering problems.
-- **Is server validation sufficient?** No: it lacks body/field limits, language/context validation, provider response validation, timeout, and rate limit.
+- **What happens after request failure?** The console logs an error and clears loading; the user still sees no error, retry, or fallback. Add all three.
+- **Are simultaneous requests prevented?** Yes for normal UI use: composer and suggested-question controls are disabled while a request is active. Server-side idempotency/request sequencing would add defence in depth.
+- **Is server validation sufficient?** It now enforces JSON/body limits, question length, supported language, context shape/count/field sizes, feedback fields, and provider response shape. It still needs rate limiting, authentication where appropriate, upstream timeout/retry, and a stronger server-side retrieval trust boundary.
 - **Why is `updatedAt` rendered?** It is unfinished: no message assigns it, so the branch never renders.
 - **Why is `labels.empty` unused?** It appears intended for no-match feedback, but the app calls the server even with no local match.
 - **Is `App.css` used?** No. `main.jsx` imports `index.css`; remove or integrate stale CSS after confirming it is unused.
 - **Is the README production-ready?** No. It is largely Vite boilerplate and needs setup, environment variables, API process, architecture, safety, tests, and deployment documentation.
-- **Are there tests?** No test script exists. Build and lint exist, but unit/integration/E2E coverage must be introduced.
+- **Are there tests?** No test script exists. Build, lint, and `node --check server.cjs` pass, but unit/integration/E2E coverage must be introduced.
 
 ## 6. Agriculture/domain answers
 
@@ -225,24 +231,24 @@ Use a strict grounded answer mode, a minimum retrieval-confidence gate, an expli
 
 For multilingual quality, use a reviewed question set in each language, compare retrieval and answers for factual equivalence and naturalness, and test code-switched input. Do not instruct merely `Answer in tcy`; map language codes to explicit language names and validate output with human reviewers. If Tulu embeddings are poor, fall back transparently to lexical retrieval/curated navigation and prioritize a tested multilingual model; never silently pretend confidence is high.
 
-Add a feedback control for “incorrect,” “unsafe,” “not in my language,” and “needs expert help,” plus an escalation path to KVK/extension contacts. Protect consent, minimize farm data, and state that output is educational—not financial, legal, medical, or pesticide-label advice.
+The product now has feedback controls for “outdated,” “unsafe,” and “unclear,” with an optional comment and release/section traceability. Next, add “not in my language” and “needs expert help,” plus an escalation path to KVK/extension contacts. Protect consent, minimize farm data, and state that output is educational—not financial, legal, medical, or pesticide-label advice.
 
 ## 8. Testing, debugging, and delivery
 
 ### How do you run it?
 
-Run `npm install`, then `npm run dev` for Vite and `npm run api` in another terminal for the API. `npm run build` produces the static frontend bundle; `npm run preview` serves that build for a frontend preview; `npm run start` starts the Node server; `npm run lint` runs Oxlint. Create a local `.env` with `LLM_API_URL`, `LLM_API_KEY`, optional `LLM_MODEL`, `PORT`, and `FRONTEND_ORIGIN`; commit only a redacted `.env.example`, never a key.
+Run `npm install`, then `npm run dev` for Vite and `npm run api` in another terminal for the API. `npm run build` produces the static frontend bundle; `npm run preview` serves that build for a frontend preview; `npm run start` starts the Node server; `npm run lint` runs Oxlint. Create a local `.env` with `LLM_API_URL`, `LLM_API_KEY`, optional `LLM_MODEL`, `PORT`, and `FRONTEND_ORIGIN`; use `VITE_GUIDE_MANIFEST_URL` only for a deployed immutable-release manifest. Commit only the redacted `.env.example`, never a key.
 
 Dev and API are separate because Vite's development server serves and hot-reloads frontend assets, while the Node process protects the provider secret and performs upstream calls. A production deployment can still expose them behind one domain/reverse proxy.
 
 ### What tests would you add?
 
-Unit-test `buildSections` for headings, preface handling, empty content, and content fidelity. Unit-test hash freshness with changed heading/content/order. Wrap IndexedDB and the embedder behind interfaces, then use fake IndexedDB and a deterministic fake embedding vector to test cache reuse, rewrite, retrieval ranking, threshold behavior, and fallback after model failure.
+Unit-test `buildSections` for headings, preface handling, empty content, versioned IDs, and content fidelity. Unit-test hash freshness with changed heading/content/order. Wrap IndexedDB and the embedder behind interfaces, then use fake IndexedDB and a deterministic fake embedding vector to test cache reuse, version isolation, retrieval ranking, threshold behavior, and fallback after model failure. Test that a release does not replace the visible guide until all languages and indexes are ready, and that a manifest rollback restores the last healthy version.
 
-For the API, inject/mocking `fetch` and test valid response, missing question, invalid JSON, oversized body, invalid language/context, provider 401/500/timeout, malformed provider JSON, and safe error shapes. Add browser end-to-end tests for language switch/history policy, greeting without model load, question submission, retry state, source display, keyboard focus, responsive layout, and semantic fallback. Run accessibility checks (keyboard, screen reader smoke test, contrast) and test low-end/slow-network first model download.
+For the API, inject/mock `fetch` and test valid response, missing question, invalid JSON, oversized body, invalid language/context, provider 401/500/timeout, malformed provider JSON, feedback validation/persistence, and safe error shapes. Add browser end-to-end tests for language switch/history policy, greeting without model load, question submission, disabled suggestions during submission, feedback submission, release swap/rollback, source display, keyboard focus, responsive layout, and semantic fallback. Run accessibility checks (keyboard, screen reader smoke test, contrast) and test low-end/slow-network first model download.
 
 CI should run install with lockfile, lint, build, unit/integration/E2E tests, dependency/security scanning, and a deploy smoke test. Use content snapshots/parity assertions to catch missing translated sections. Version guides and model/index schema, deploy with a rollback artifact, and invalidate or namespace cached indexes when a guide/model changes.
 
 ## 9. Strong 60-second explanation
 
-“Krishi is a multilingual farming guidance portal designed for Dakshina Kannada. It combines a readable local guide in English, Kannada, and Tulu with a question interface. For a question, the browser splits the selected Markdown guide by section, uses Transformers.js to create normalized embeddings, caches the section vectors in IndexedDB, and retrieves the most relevant local sections with a cosine-similarity search. It then sends only the question, language, and local excerpts to a Node API, which holds the LLM key and generates a low-temperature answer. The main value is that the answer starts from local context rather than a generic chatbot. I am also candid about the prototype gaps: the Guide/Latest switch is not yet functional, citations are only local headings, multilingual content is not fully equivalent, and the next priorities are strict grounded mode, verified citations, error/fallback UX, API hardening, tests, and agronomist-reviewed safety governance.”
+“Krishi is a multilingual farming guidance portal designed for Dakshina Kannada. It combines a readable local guide in English, Kannada, and Tulu with a question interface. For a question, the browser splits the selected Markdown guide by section, uses Transformers.js to create normalized embeddings, caches the section vectors in IndexedDB, and retrieves the most relevant local sections with cosine similarity. It then sends the question, language, release version, and local excerpts to a Node API, which keeps the LLM key server-side and generates a low-temperature answer. The guide content is released through an immutable manifest: the app downloads and indexes a complete new release before atomically switching, so updates and rollbacks do not interrupt users. Feedback is tied to the exact release and retrieved sections. The remaining priorities are a real distinction between Guide and Latest modes, verifiable citations, visible error/retry UX, full language parity, rate limiting/timeouts/tests, and agronomist-reviewed safety governance.”

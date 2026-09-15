@@ -14,6 +14,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+data/feedback.ndjson
 
 # Editor directories and files
 .vscode/*
