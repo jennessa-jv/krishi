@@ -73,8 +73,8 @@ ${context || 'No relevant guide information was found.'}
   return result.choices[0].message.content;
 }
 
-
-const server = http.createServer(async (request, response) => {
+//?frontend JavaScript is visible to users.
+const server = http.createServer(async (request, response) => {   //Every time the frontend sends an HTTP request, this function runs.
 
   // -------------------------
   // CORS

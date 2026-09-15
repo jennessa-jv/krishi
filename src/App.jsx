@@ -25,7 +25,7 @@ const labels = {
   tcy: { title: 'ಕೃಷಿನ್ ಕೇಳಲೆ', subtitle: 'ನಿಕ್ಲೆನ ಮಾರ್ಗದರ್ಶಿರ್ದ್ ಉತ್ತರ', latestSubtitle: 'ಇತ್ತೀಚಿನ ಮೂಲೊಲು ಅತ್ತ್ಂಡ ಉಲ್ಲೇಖೊಲು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣ್, ನೀರ್ ಅತ್ತ್ಂಡ ಯೋಜನೆ ಬಗ್ಗೆ ಕೇಳಲೆ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿದ ಬಗ್ಗೆ ಕೇಳಲೆ.', greeting: 'ನಮಸ್ಕಾರ. ಈ ದಿನ ಉಮೆರ್ ಕೃಷಿಗ್ ಯಾನ್ ಎಂಚ ಸಹಾಯ ಮಲ್ಪೊಲಿ?', grounded: 'ಆಯ್ಕೆ ಮಲ್ತಿನ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಡ್ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಕ್ಕಿಜಿ. ಬೆಳೆ, ಋತು, ಮಣ್ಣ್, ಡ್ರೈನೇಜ್, ಕೀಟ, ಯೋಜನೆ ಅತ್ತ್ಂಡ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಲೆ.', open: 'ಮಾರ್ಗದರ್ಶಿ ತೆರೆಲೆ', close: 'ಸಹಾಯಕನ್ ಮುಚ್ಚಲೆ' }
 };
 
-function buildSections(content) {
+function buildSections(content) {  //splitting it into heading and content
   return content.split(/(?=^##\s)/m).map((section) => {
     const heading = section.match(/^##\s+(.+)$/m)?.[1]?.trim();
     return heading ? { heading, content: section.trim() } : null;
@@ -39,7 +39,7 @@ const SEMANTIC_RELEVANCE_THRESHOLD = 0.32;
 let embedderPromise;
 
 function getEmbedder() {
-  embedderPromise ||= pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+  embedderPromise ||= pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2'); //converts it to vector embeddings of the data
   return embedderPromise;
 }
 
@@ -48,16 +48,30 @@ async function getContentHash(section) {
   const digest = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
-
+// If the guide doesn't change, the hash doesn't change.
+// If you modify the guide, the hash changes.
+// That lets you determine whether your stored vectors are still valid.
+//? Guide sections
+//      ↓
+// Generate embeddings
+//      ↓
+// Store embeddings in IndexedDB
+//      ↓
+// Next time:
+//      ↓
+// Check IndexedDB
+//      ↓
+// If guide hasn't changed → reuse vectors
+// If guide changed → generate new vectors
 function openVectorDatabase() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(VECTOR_DB_NAME, 1);
-    request.onupgradeneeded = () => request.result.createObjectStore(VECTOR_STORE_NAME, { keyPath: 'id' });
-    request.onsuccess = () => resolve(request.result);
+    const request = indexedDB.open(VECTOR_DB_NAME, 1);  //opens up a connection to the database, creating it if it doesn't exist, and setting up the object store for storing vector representations of guide sections.
+    request.onupgradeneeded = () => request.result.createObjectStore(VECTOR_STORE_NAME, { keyPath: 'id' }); //creates a persistent storage with primary key 'id' for each vector representation of a guide section.
+    request.onsuccess = () => resolve(request.result);  //when it successfully opens it contains the object                 //basically a table
     request.onerror = () => reject(request.error);
   });
 }
-
+//Give me all the stored vectors for this language
 async function readVectorIndex(language) {
   const database = await openVectorDatabase();
   return new Promise((resolve, reject) => {
@@ -67,12 +81,15 @@ async function readVectorIndex(language) {
   });
 }
 
-async function writeVectorIndex(language, sections) {
+async function writeVectorIndex(language, sections) { //creates the vector embeddings
   const embed = await getEmbedder();
   const vectors = await Promise.all(sections.map(async (section, index) => {
     const output = await embed(`${section.heading}\n${section.content}`, { pooling: 'mean', normalize: true });
+//     Why store vectors?
+// Because generating embeddings can take time.
+// You don't want to regenerate embeddings every time
     return { id: `${language}-${index}`, language, heading: section.heading, content: section.content, contentHash: await getContentHash(section), vector: Array.from(output.data) };
-  }));
+  }));   //output.data is probably a typed array
   const database = await openVectorDatabase();
   await new Promise((resolve, reject) => {
     const transaction = database.transaction(VECTOR_STORE_NAME, 'readwrite');
@@ -80,8 +97,8 @@ async function writeVectorIndex(language, sections) {
     store.getAll().onsuccess = (event) => event.target.result
       .filter((entry) => entry.language === language)
       .forEach((entry) => store.delete(entry.id));
-    vectors.forEach((vector) => store.put(vector));
-    transaction.oncomplete = resolve;
+    vectors.forEach((vector) => store.put(vector));  
+    transaction.oncomplete = resolve; //Insert it if it doesn't exist; otherwise replace the existing object.
     transaction.onerror = () => reject(transaction.error);
   });
   return vectors;
@@ -110,6 +127,15 @@ function findKeywordAnswer(question, sections) {
     rain: ['rainfall', 'monsoon', 'drainage'],
     rainfall: ['rain', 'monsoon', 'drainage']
   };
+//   Question
+//    ↓
+// Tokenize
+//    ↓
+// Remove stop words
+//    ↓
+// Add related terms
+//    ↓
+// Remove duplicates
   const tokenize = (text) => text.toLocaleLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || [];
   const terms = [...new Set(tokenize(question)
     .filter((term) => !stopWords.has(term))
@@ -158,7 +184,7 @@ export default function App() {
   const [asking, setAsking] = useState(false);
   const [indexStatus, setIndexStatus] = useState('loading');
   const currentLabels = labels[lang];
-  const sections = useMemo(() => buildSections(guides[lang].content), [lang]);
+  const sections = useMemo(() => buildSections(guides[lang].content), [lang]);  //?You use useMemo to cache the result of a calculation between component re-renders. 
 
   useEffect(() => {
     let cancelled = false;
