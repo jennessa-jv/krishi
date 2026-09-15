@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 8787;
 const LLM_API_URL = process.env.LLM_API_URL;
 const LLM_API_KEY = process.env.LLM_API_KEY;
 const LLM_MODEL = process.env.LLM_MODEL || 'gpt-4o-mini';
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_CONTEXT_ITEMS = 3;
 const MAX_CONTEXT_CHARS = 8000;
@@ -47,7 +48,7 @@ async function storeFeedback(body) {
   await fs.appendFile(FEEDBACK_FILE, `${JSON.stringify(record)}\n`, 'utf8'); return true;
 }
 const server = http.createServer(async (request, response) => {
-  response.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_ORIGIN || ''); response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS'); response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  response.setHeader('Access-Control-Allow-Origin', FRONTEND_ORIGIN); response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS'); response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (request.method === 'OPTIONS') { response.writeHead(204); response.end(); return; }
   try {
     if (request.method === 'POST' && request.url === '/api/ask') { const validated = validateAsk(await readJson(request)); if (validated.error) return sendJson(response, 400, { error: validated.error }); return sendJson(response, 200, { answer: await generateAnswer(validated.question, validated.language, validated.localContext), guideVersion: validated.guideVersion }); }

@@ -118,3 +118,7 @@ button, input { font: inherit; }
 .feedback-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 10px; color: var(--muted); font-size: 10px; }
 .feedback-actions button { border: 1px solid var(--line); background: transparent; border-radius: 4px; color: var(--green); cursor: pointer; font-size: 10px; padding: 3px 5px; }
 .feedback-status { display: block; color: var(--green); font-size: 10px; margin-top: 10px; }
+.chat-answer > :first-child { margin-top: 0; }
+.chat-answer > :last-child { margin-bottom: 0; }
+.chat-answer p { margin: 0 0 10px; }
+.chat-answer img { max-width: 100%; height: auto; }
