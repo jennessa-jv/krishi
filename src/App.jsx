@@ -12,11 +12,13 @@ const labels = {
   kn: { title: 'ಕೃಷಿಯನ್ನು ಕೇಳಿ', subtitle: 'ನಿಮ್ಮ ಕೃಷಿ ಮಾರ್ಗದರ್ಶಿಯಿಂದ ಉತ್ತರಗಳು', latestSubtitle: 'ಪ್ರಸ್ತುತ ಮೂಲಗಳು ಮತ್ತು ಉಲ್ಲೇಖಗಳು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣು, ನೀರು ಅಥವಾ ಯೋಜನೆಗಳ ಬಗ್ಗೆ ಕೇಳಿ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿಯ ಬಗ್ಗೆ ಕೇಳಿ.', greeting: 'ನಮಸ್ಕಾರ. ಇಂದು ನಿಮ್ಮ ಕೃಷಿಗೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?', grounded: 'ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಯಲ್ಲಿ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಗಲಿಲ್ಲ. ಬೆಳೆ, ಋತು, ಮಣ್ಣು, ಒಳಚರಂಡಿ, ಕೀಟ, ಯೋಜನೆ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಿ.', latestError: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ ಈಗ ಲಭ್ಯವಿಲ್ಲ. ಸ್ಥಳೀಯ ಮಾರ್ಗದರ್ಶಿಯ ಉತ್ತರಕ್ಕಾಗಿ ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರವನ್ನು ಆಯ್ಕೆಮಾಡಿ, ಅಥವಾ API ಸರ್ವರ್ ಮತ್ತು ಅದರ ಸಂರಚನೆಯನ್ನು ಪರಿಶೀಲಿಸಿ.', close: 'ಸಹಾಯಕನನ್ನು ಮುಚ್ಚಿ' },
   tcy: { title: 'ಕೃಷಿನ್ ಕೇಳಲೆ', subtitle: 'ನಿಕ್ಲೆನ ಮಾರ್ಗದರ್ಶಿರ್ದ್ ಉತ್ತರ', latestSubtitle: 'ಇತ್ತೀಚಿನ ಮೂಲೊಲು ಅತ್ತ್ಂಡ ಉಲ್ಲೇಖೊಲು', placeholder: 'ಬೆಳೆ, ಮಣ್ಣ್, ನೀರ್ ಅತ್ತ್ಂಡ ಯೋಜನೆ ಬಗ್ಗೆ ಕೇಳಲೆ...', welcome: 'ನಮಸ್ಕಾರ. ದಕ್ಷಿಣ ಕನ್ನಡದ ಕೃಷಿದ ಬಗ್ಗೆ ಕೇಳಲೆ.', greeting: 'ನಮಸ್ಕಾರ. ಈ ದಿನ ಉಮೆರ್ ಕೃಷಿಗ್ ಯಾನ್ ಎಂಚ ಸಹಾಯ ಮಲ್ಪೊಲಿ?', grounded: 'ಆಯ್ಕೆ ಮಲ್ತಿನ ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ', latest: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ', guide: 'ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ', sources: 'ಮೂಲ', empty: 'ಈ ಮಾರ್ಗದರ್ಶಿಡ್ ಹತ್ತಿರದ ಉತ್ತರ ಸಿಕ್ಕಿಜಿ. ಬೆಳೆ, ಋತು, ಮಣ್ಣ್, ಡ್ರೈನೇಜ್, ಕೀಟ, ಯೋಜನೆ ಅತ್ತ್ಂಡ ಮಾರುಕಟ್ಟೆ ಬಗ್ಗೆ ಕೇಳಲೆ.', latestError: 'ಇತ್ತೀಚಿನ ಮಾಹಿತಿ ಇತ್ತ್ಂಡ ಲಭ್ಯ ಆಪುಜಿ. ಸ್ಥಳೀಯ ಮಾರ್ಗದರ್ಶಿರ್ದ ಉತ್ತರೊಕ್ ಮಾರ್ಗದರ್ಶಿ ಉತ್ತರ ಆಯ್ಕೆ ಮಲ್ಪುಲೆ, ಅತ್ತ್ಂಡ API ಸರ್ವರ್ ಪನ್ಪಿನ ಸೆಟ್ಟಿಂಗ್ ಪರಿಶೀಲಿಸಲೆ.', close: 'ಸಹಾಯಕನ್ ಮುಚ್ಚಲೆ' }
 };
-const VECTOR_DB_NAME = 'krishi-vector-database';
+// A separate store ensures old English-only vectors are never reused after changing models.
+const VECTOR_DB_NAME = 'krishi-vector-database-multilingual-v2';
 const VECTOR_STORE_NAME = 'guide-sections';
 const MAX_RETRIEVED_SECTIONS = 3;
 const SEMANTIC_RELEVANCE_THRESHOLD = 0.32;
 let embedderPromise;
+const EMBEDDING_MODEL = 'Xenova/paraphrase-multilingual-MiniLM-L12-v2';
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 function buildSections(content, language, version) {
@@ -25,7 +27,7 @@ function buildSections(content, language, version) {
     return heading ? { id: `${version}:${language}:${index}`, heading, content: section.trim() } : null;
   }).filter(Boolean);
 }
-function getEmbedder() { embedderPromise ||= pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2'); return embedderPromise; }
+function getEmbedder() { embedderPromise ||= pipeline('feature-extraction', EMBEDDING_MODEL); return embedderPromise; }
 async function getContentHash(section) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${section.heading}\n${section.content}`));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -71,7 +73,8 @@ function isGreeting(question) { return /^(hi|hello|hey|ನಮಸ್ಕಾರ|ನ
 function findKeywordAnswer(question, sections) {
   const stopWords = new Set(['what', 'which', 'how', 'can', 'are', 'the', 'for', 'about', 'from', 'and', 'you', 'your', 'present']);
   const relatedTerms = { weather: ['climate', 'rainfall', 'monsoon'], climate: ['weather', 'rainfall', 'monsoon'], rain: ['rainfall', 'monsoon', 'drainage'], rainfall: ['rain', 'monsoon', 'drainage'] };
-  const tokenize = (text) => text.toLocaleLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || [];
+  // Kannada and Tulu words contain combining marks, so include them in a token instead of splitting words apart.
+  const tokenize = (text) => text.toLocaleLowerCase().match(/[\p{L}\p{M}\p{N}]{2,}/gu) || [];
   const terms = [...new Set(tokenize(question).filter((term) => !stopWords.has(term)).flatMap((term) => [term, ...(relatedTerms[term] || [])]))];
   const ranked = sections.map((section) => {
     const headingTerms = new Set(tokenize(section.heading)); const contentTerms = new Set(tokenize(section.content));
