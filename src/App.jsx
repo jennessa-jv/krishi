@@ -17,6 +17,7 @@ const VECTOR_STORE_NAME = 'guide-sections';
 const MAX_RETRIEVED_SECTIONS = 3;
 const SEMANTIC_RELEVANCE_THRESHOLD = 0.32;
 let embedderPromise;
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 function buildSections(content, language, version) {
   return content.split(/(?=^##\s)/m).map((section, index) => {
@@ -88,7 +89,7 @@ async function findSemanticAnswer(question, language, version, sections) {
   } catch { return findKeywordAnswer(question, sections); }
 }
 async function askLatest(question, language, guideVersion, localMatches) {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ask`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, language, guideVersion, localContext: localMatches.map(({ id, heading, content }) => ({ id, heading, content })) }) });
+  const response = await fetch(`${API_BASE_URL}/api/ask`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, language, guideVersion, localContext: localMatches.map(({ id, heading, content }) => ({ id, heading, content })) }) });
   if (!response.ok) throw new Error('Latest information is unavailable');
   return response.json();
 }
@@ -97,7 +98,7 @@ function getGuideAnswer(matches, emptyMessage) {
   return matches.map((match) => match.content.replace(/^##\s+.+\r?\n/, '')).join('\n\n');
 }
 async function sendFeedback(message, category, comment) {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answerId: message.answerId, guideVersion: message.guideVersion, language: message.language, sectionIds: message.sectionIds, category, comment }) });
+  const response = await fetch(`${API_BASE_URL}/api/feedback`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answerId: message.answerId, guideVersion: message.guideVersion, language: message.language, sectionIds: message.sectionIds, category, comment }) });
   if (!response.ok) throw new Error('Feedback could not be sent');
 }
 

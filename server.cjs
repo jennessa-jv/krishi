@@ -12,10 +12,30 @@ const MAX_BODY_BYTES = 64 * 1024;
 const MAX_CONTEXT_ITEMS = 3;
 const MAX_CONTEXT_CHARS = 8000;
 const FEEDBACK_FILE = path.join(__dirname, 'data', 'feedback.ndjson');
+const DIST_DIRECTORY = path.join(__dirname, 'dist');
 const LANGUAGES = new Set(['en', 'kn', 'tcy']);
 const FEEDBACK_CATEGORIES = new Set(['outdated', 'unsafe', 'unclear']);
+const MIME_TYPES = { '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.md': 'text/markdown; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 
 function sendJson(response, status, body) { response.writeHead(status, { 'Content-Type': 'application/json' }); response.end(JSON.stringify(body)); }
+async function sendStaticFile(request, response) {
+  const requestPath = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+  const relativePath = requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, '');
+  const candidate = path.resolve(DIST_DIRECTORY, relativePath);
+  const safeCandidate = candidate.startsWith(`${DIST_DIRECTORY}${path.sep}`) || candidate === path.join(DIST_DIRECTORY, 'index.html');
+  const filePath = safeCandidate ? candidate : path.join(DIST_DIRECTORY, 'index.html');
+  try {
+    const content = await fs.readFile(filePath);
+    response.writeHead(200, { 'Content-Type': MIME_TYPES[path.extname(filePath)] || 'application/octet-stream', 'Cache-Control': path.extname(filePath) === '.html' ? 'no-cache' : 'public, max-age=31536000, immutable' });
+    response.end(content);
+  } catch {
+    try {
+      const index = await fs.readFile(path.join(DIST_DIRECTORY, 'index.html'));
+      response.writeHead(200, { 'Content-Type': MIME_TYPES['.html'], 'Cache-Control': 'no-cache' });
+      response.end(index);
+    } catch { sendJson(response, 503, { error: 'Frontend build is unavailable. Run npm run build before starting the server.' }); }
+  }
+}
 async function readJson(request) {
   let size = 0; const chunks = [];
   for await (const chunk of request) { size += chunk.length; if (size > MAX_BODY_BYTES) throw new Error('REQUEST_TOO_LARGE'); chunks.push(chunk); }
@@ -53,6 +73,7 @@ const server = http.createServer(async (request, response) => {
   try {
     if (request.method === 'POST' && request.url === '/api/ask') { const validated = validateAsk(await readJson(request)); if (validated.error) return sendJson(response, 400, { error: validated.error }); return sendJson(response, 200, { answer: await generateAnswer(validated.question, validated.language, validated.localContext), guideVersion: validated.guideVersion }); }
     if (request.method === 'POST' && request.url === '/api/feedback') { const accepted = await storeFeedback(await readJson(request)); return accepted ? sendJson(response, 202, { accepted: true }) : sendJson(response, 400, { error: 'Invalid feedback' }); }
+    if (request.method === 'GET' || request.method === 'HEAD') return sendStaticFile(request, response);
     response.writeHead(404); response.end('Not found');
   } catch (error) { if (error.message === 'INVALID_JSON') return sendJson(response, 400, { error: 'Invalid JSON' }); if (error.message === 'REQUEST_TOO_LARGE') return sendJson(response, 413, { error: 'Request is too large' }); console.error(error); sendJson(response, 500, { error: 'Request could not be completed' }); }
 });
