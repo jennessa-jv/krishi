@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { pipeline, env } from '@xenova/transformers';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { pipeline } from '@xenova/transformers';
 import { BookOpen, ChevronRight, Leaf, MessageCircle, Send, Sparkles, X } from 'lucide-react';
 import { bundledGuideRelease, loadGuideRelease } from './guideRelease';
-
+env.allowLocalModels = false;
+env.allowRemoteModels = true;
+env.remoteHost = 'https://huggingface.co';
 const guideNames = { en: 'English', kn: 'ಕನ್ನಡ (Kannada)', tcy: 'ತುಳು (Tulu)' };
 const suggestions = { en: ['How should I manage water during monsoon?', 'Which crops work well under areca?', 'How can I reduce disease risk?'], kn: ['ಮುಂಗಾರಿನಲ್ಲಿ ನೀರನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸಬೇಕು?', 'ಅಡಿಕೆಯೊಂದಿಗೆ ಯಾವ ಬೆಳೆಗಳನ್ನು ಬೆಳೆಯಬಹುದು?', 'ರೋಗದ ಅಪಾಯವನ್ನು ಹೇಗೆ ಕಡಿಮೆ ಮಾಡಬಹುದು?'], tcy: ['ಮುಂಗಾರೊಡು ನೀರ್ ಎಂಚ ನಿರ್ವಹಣೆ ಮಲ್ಪುನೆ?', 'ಅಡಿಕೆದ ಒಟ್ಟುಗು ವಾ ಬೆಳೆಕುಲು ಎಡ್ಡೆ?', 'ಸೀಕ್‌ದ ಅಪಾಯ ಎಂಚ ಕಮ್ಮಿ ಮಲ್ಪುನೆ?'] };
 const labels = {
