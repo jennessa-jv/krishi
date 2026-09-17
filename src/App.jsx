@@ -152,7 +152,13 @@ export default function App() {
         }
         if (!cancelled) { setRelease(next); setReleaseStatus('ready'); }
       }
-      catch { if (!cancelled) setReleaseStatus('unavailable'); }
+            catch (error) {
+        console.error('Guide release failed:', error);
+
+        if (!cancelled) {
+          setReleaseStatus('unavailable');
+        }
+      }
       finally { refreshingRelease.current = false; }
     };
     refreshRelease();
