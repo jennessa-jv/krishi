@@ -7,7 +7,7 @@ import { bundledGuideRelease, loadGuideRelease } from './guideRelease';
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.remoteHost = 'https://huggingface.co';
-const guideNames = { en: 'English', kn: 'ಕನ್ನಡ (Kannada)', tcy: 'ತುಳು (Tulu)' };
+const guideNames = { en: 'English', kn: 'ಕನ್ನಡ (Kannada)', tcy: 'ತುಳು (Tulu · ಕನ್ನಡ ಲಿಪಿ)' };
 const suggestions = { en: ['How should I manage water during monsoon?', 'Which crops work well under areca?', 'How can I reduce disease risk?'], kn: ['ಮುಂಗಾರಿನಲ್ಲಿ ನೀರನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸಬೇಕು?', 'ಅಡಿಕೆಯೊಂದಿಗೆ ಯಾವ ಬೆಳೆಗಳನ್ನು ಬೆಳೆಯಬಹುದು?', 'ರೋಗದ ಅಪಾಯವನ್ನು ಹೇಗೆ ಕಡಿಮೆ ಮಾಡಬಹುದು?'], tcy: ['ಮುಂಗಾರೊಡು ನೀರ್ ಎಂಚ ನಿರ್ವಹಣೆ ಮಲ್ಪುನೆ?', 'ಅಡಿಕೆದ ಒಟ್ಟುಗು ವಾ ಬೆಳೆಕುಲು ಎಡ್ಡೆ?', 'ಸೀಕ್‌ದ ಅಪಾಯ ಎಂಚ ಕಮ್ಮಿ ಮಲ್ಪುನೆ?'] };
 const labels = {
   en: { title: 'Ask Krishi', subtitle: 'Answers from your farming guide', latestSubtitle: 'Answers from the web', placeholder: 'Ask about crops, soil, water or schemes...', welcome: 'Hello. Ask me about farming in Dakshina Kannada.', greeting: 'Hello. How can I help with your farm today?', grounded: 'Grounded in your selected guide', latest: 'Ask the internet', guide: 'From the guide', sources: 'Source', empty: 'I could not find a close match in this guide. Try asking about a crop, season, soil, drainage, pests, schemes or markets.', latestError: 'Internet search is unavailable. Choose From the guide for an answer from the local guide, or start the API server and check its configuration.', close: 'Close assistant' },
