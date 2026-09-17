@@ -46,7 +46,15 @@ function buildSections(content, language, version) {
 //     content: "..."
 //   }
 // ]
-function getEmbedder() { embedderPromise ||= pipeline('feature-extraction', EMBEDDING_MODEL); return embedderPromise; }
+function getEmbedder() {
+  if (!embedderPromise) {
+    embedderPromise = pipeline('feature-extraction', EMBEDDING_MODEL).catch((error) => {
+      embedderPromise = undefined;
+      throw error;
+    });
+  }
+  return embedderPromise;
+}
 async function getContentHash(section) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${section.heading}\n${section.content}`));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -147,11 +155,6 @@ export default function App() {
       refreshingRelease.current = true;
       try {
         const next = await loadGuideRelease();
-        if (next.activeVersion !== release.activeVersion) {
-          await Promise.all(Object.keys(guideNames).map((language) =>
-            getVectorIndex(language, next.activeVersion, buildSections(next.guides[language].content, language, next.activeVersion))
-          ));
-        }
         if (!cancelled) { setRelease(next); setReleaseStatus('ready'); }
       }
             catch (error) {
@@ -168,6 +171,7 @@ export default function App() {
     return () => { cancelled = true; window.clearInterval(interval); };
   }, [release.activeVersion]);
   useEffect(() => {
+    if (release.activeVersion === 'loading') return undefined;
     let cancelled = false; setIndexStatus('loading');
     getVectorIndex(lang, release.activeVersion, sections).then(() => !cancelled && setIndexStatus('ready')).catch(() => !cancelled && setIndexStatus('fallback'));
     return () => { cancelled = true; };
