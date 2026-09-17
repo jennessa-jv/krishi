@@ -27,6 +27,23 @@ function buildSections(content, language, version) {
     return heading ? { id: `${version}:${language}:${index}`, heading, content: section.trim() } : null;
   }).filter(Boolean);
 }
+// [
+//   {
+//     id: "v1:en:0",
+//     heading: "Arecanut Farming",
+//     content: "..."
+//   },
+//   {
+//     id: "v1:en:1",
+//     heading: "Monsoon Management",
+//     content: "..."
+//   },
+//   {
+//     id: "v1:en:2",
+//     heading: "Disease Management",
+//     content: "..."
+//   }
+// ]
 function getEmbedder() { embedderPromise ||= pipeline('feature-extraction', EMBEDDING_MODEL); return embedderPromise; }
 async function getContentHash(section) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${section.heading}\n${section.content}`));
@@ -108,7 +125,7 @@ async function sendFeedback(message, category, comment) {
 export default function App() {
   const [lang, setLang] = useState('en');
   const [release, setRelease] = useState(bundledGuideRelease);
-  const [releaseStatus, setReleaseStatus] = useState('bundled');
+  const [releaseStatus, setReleaseStatus] = useState('loading');
   const [chatOpen, setChatOpen] = useState(true);
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState([]);
@@ -119,6 +136,7 @@ export default function App() {
   const currentGuide = release.guides[lang];
   const currentLabels = labels[lang];
   const sections = useMemo(() => buildSections(currentGuide.content, lang, release.activeVersion), [currentGuide.content, lang, release.activeVersion]);
+  //Take the current farming guide, split it into sections, and attach the language and guide version
 
   useEffect(() => {
     let cancelled = false;
@@ -134,7 +152,7 @@ export default function App() {
         }
         if (!cancelled) { setRelease(next); setReleaseStatus('ready'); }
       }
-      catch { if (!cancelled) setReleaseStatus('bundled'); }
+      catch { if (!cancelled) setReleaseStatus('unavailable'); }
       finally { refreshingRelease.current = false; }
     };
     refreshRelease();
